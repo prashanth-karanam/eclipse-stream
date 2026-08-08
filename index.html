@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="Eclipse — Track your anime, manhwa, series, and movies with a beautiful cinematic interface">
+  <title>Eclipse — Your Cinematic Universe</title>
+  <link rel="stylesheet" href="styles.css?v=6.5">
+</head>
+<body>
+
+  <!-- ============================================================
+       0. AUTHENTICATION OVERLAY
+       ============================================================ -->
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h2 class="auth-title" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+          <img src="logo.png" alt="Eclipse Logo" style="height:32px; border-radius:6px;">Eclipse<span class="auth-dot">.</span>
+        </h2>
+        <p class="auth-subtitle">Enter the cinematic universe</p>
+      </div>
+      
+      <form id="authForm" class="auth-form">
+        <div class="auth-input-group" id="authUsernameGroup" style="display: none;">
+          <input type="text" id="authUsername" placeholder=" " autocomplete="username">
+          <label for="authUsername">Username</label>
+        </div>
+        <div class="auth-input-group">
+          <input type="email" id="authEmail" required placeholder=" " autocomplete="email">
+          <label for="authEmail">Email address</label>
+        </div>
+        <div class="auth-input-group">
+          <input type="password" id="authPassword" required placeholder=" " autocomplete="current-password">
+          <label for="authPassword">Password</label>
+        </div>
+        
+        <button type="submit" class="auth-btn" id="authSubmitBtn">Sign In</button>
+      </form>
+      
+      <div class="auth-footer">
+        <span id="authToggleText">New here?</span>
+        <button type="button" id="authToggleBtn" class="auth-toggle-btn">Create Account</button>
+        <div style="margin-top: 12px; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+          <button type="button" id="authGuestBtn" class="auth-toggle-btn" style="color: var(--text-muted); font-size: 12px;" onclick="const u = prompt('Enter a username for your local session:', 'Guest'); if(u) { localStorage.setItem('eclipse_username', u); document.getElementById('authOverlay').style.display='none'; if(window.updateProfileDisplay) window.updateProfileDisplay(u); }">Continue as Guest &rarr;</button>
+        </div>
+      </div>
+      <div id="authErrorMsg" class="auth-error-msg"></div>
+    </div>
+  </div>
+  <!-- ============================================================
+       1. STICKY NAV BAR
+       ============================================================ -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar__left">
+      <!-- Logo -->
+      <div class="navbar__logo" style="display:flex; align-items:center;">
+        <img src="logo.png" alt="Eclipse Logo" style="height:24px; margin-right:8px; border-radius:4px;">Eclipse<span class="navbar__logo-dot"></span>
+      </div>
+
+      <!-- Category Pills -->
+      <div class="navbar__categories" id="categoryPills">
+        <button class="category-pill active" data-category="all">All</button>
+        <button class="category-pill" data-category="anime">Anime</button>
+        <button class="category-pill" data-category="manhwa">Manhwa</button>
+        <button class="category-pill" data-category="series">Series</button>
+        <button class="category-pill" data-category="movies">Movies</button>
+      </div>
+    </div>
+
+    <div class="navbar__right">
+      <!-- Search -->
+      <div class="nav-search" id="navSearch">
+        <input type="text" class="nav-search__input" id="navSearchInput"
+               placeholder="Search titles..." autocomplete="off">
+        <button class="nav-search__icon" id="navSearchToggle" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+        <div class="nav-search__dropdown" id="navSearchDropdown">
+          <div class="nav-search__jump" id="jumpToMatrix">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+            </svg>
+            <span>Looking to explore? <strong>Jump to Infinity Matrix →</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Surprise Me -->
+      <button class="nav-icon-btn" id="surpriseMeBtn" title="Surprise Me!">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="18" x2="12" y2="12"/>
+          <line x1="9" y1="15" x2="15" y2="15"/>
+        </svg>
+      </button>
+
+      <!-- Insights Hub Icon -->
+      <button class="nav-icon-btn insights-btn" id="insightsBtn" title="Insights Hub">
+        <span class="orb-ring"></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
+          <path d="M22 12A10 10 0 0 0 12 2v10z"/>
+        </svg>
+      </button>
+
+      <!-- Avatar -->
+      <div class="avatar-wrapper" id="avatarWrapper" style="--streak-progress: 0.65">
+        <div class="avatar-ring"></div>
+        <div class="avatar-img">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+      </div>
+      <!-- Brand -->
+      <div class="nav-brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        <span class="nav-brand__text">Eclipse <span style="font-size: 10px; opacity: 0.5; font-weight: normal; margin-left: 4px;">v6.8</span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       2. HERO ZONE
+       ============================================================ -->
+  <section class="hero-zone" id="heroZone">
+    <!-- Populated state (shown when user has data) -->
+    <div class="hero-populated" id="heroPopulated">
+      <div class="hero-card">
+        <div class="hero-card__poster">
+          <div class="hero-card__poster-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
+              <line x1="7" y1="2" x2="7" y2="22"/>
+              <line x1="17" y1="2" x2="17" y2="22"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <line x1="2" y1="7" x2="7" y2="7"/>
+              <line x1="2" y1="17" x2="7" y2="17"/>
+              <line x1="17" y1="7" x2="22" y2="7"/>
+              <line x1="17" y1="17" x2="22" y2="17"/>
+            </svg>
+          </div>
+        </div>
+        <div class="hero-card__info">
+          <div class="hero-card__label" id="heroLabel">CONTINUE WATCHING</div>
+          <h2 class="hero-card__title" id="heroTitle">Jujutsu Kaisen S2</h2>
+          <!-- Mini-tabs: Planning / In-Progress queue (populated by JS) -->
+          <div class="hero-mini-tabs" id="heroMiniTabs" style="display:none;"></div>
+          <p class="hero-card__meta" id="heroMeta">Anime · Action · 23 episodes</p>
+          <div class="hero-card__progress">
+            <div class="hero-card__progress-bar">
+              <div class="hero-card__progress-fill" id="heroProgress" style="width: 65%"></div>
+            </div>
+            <span class="hero-card__progress-text" id="heroProgressText">Episode 15 of 23</span>
+          </div>
+          <div class="hero-card__actions">
+            <button class="btn-primary" id="heroPlayBtn">
+              <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Continue
+            </button>
+            <button class="btn-secondary" id="heroMarkBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Mark Complete
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="hero-stats" id="heroStats">
+        <div class="stat-card">
+          <div class="stat-card__label">Total Watch Time</div>
+          <div class="stat-card__value" id="statWatchTime">0h</div>
+          <div class="stat-card__sub">anime, series & movies</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Chapters Read</div>
+          <div class="stat-card__value" id="statChaptersRead">0</div>
+          <div class="stat-card__sub">manhwa & manga</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Completed</div>
+          <div class="stat-card__value" id="statCompleted">0</div>
+          <div class="stat-card__sub">titles finished</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Current Streak</div>
+          <div class="stat-card__value" id="statStreak">14 days</div>
+          <div class="stat-card__sub">🔥 keep going!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state (shown when user has no data for this category) -->
+    <div class="hero-empty hidden" id="heroEmpty">
+      <div class="hero-empty__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
+          <line x1="7" y1="2" x2="7" y2="22"/>
+          <line x1="17" y1="2" x2="17" y2="22"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+        </svg>
+      </div>
+      <h2 class="hero-empty__headline" id="emptyHeadline">Your cinematic journey starts here</h2>
+      <p class="hero-empty__subtext" id="emptySubtext">Track your favorite titles, discover new ones, and never lose your spot again.</p>
+      <div class="hero-empty__cta-group" id="emptyCtaGroup" style="display:flex; gap:12px; margin-top:20px; flex-wrap:wrap; justify-content:center;">
+        <button class="hero-empty__cta" data-cat="anime">Search Anime</button>
+        <button class="hero-empty__cta" data-cat="movies">Search Movies</button>
+        <button class="hero-empty__cta" data-cat="series">Search Series</button>
+        <button class="hero-empty__cta" data-cat="manhwa">Search Manhwa</button>
+        <span id="emptyCtaText" style="display:none;"></span>
+      </div>
+      <p class="hero-empty__oracle-link">
+        Or let the <a href="#" id="emptyOracleLink">Oracle recommend something →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       3. NEXT YOU MAY LIKE STRIP
+       ============================================================ -->
+  <section class="recommendation-strip" id="recommendationStrip">
+    <div class="strip-header">
+      <div>
+        <h3 class="strip-header__title" id="stripTitle">Next You May Like</h3>
+        <p class="strip-header__subtitle" id="stripSubtitle">Based on your recent activity</p>
+      </div>
+      <button class="strip-header__surprise" id="stripSurprise">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <path d="M8 13h2l2 3 2-6h2"/>
+        </svg>
+        Surprise Me
+      </button>
+    </div>
+
+    <!-- Recommendation cards (normal state) -->
+    <div class="strip-scroll" id="stripScroll">
+      <!-- Cards will be dynamically injected by app.js -->
+    </div>
+
+    <!-- Search results state (hidden by default, crossfades in when searching) -->
+    <div class="hidden" id="stripSearchResults">
+      <div class="strip-results-label">In Your Library</div>
+      <div class="strip-scroll" id="stripLibraryResults"></div>
+      <div class="strip-results-label">Discover</div>
+      <div class="strip-scroll" id="stripDiscoverResults"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       4. INFINITY MATRIX
+       ============================================================ -->
+  <section class="infinity-matrix" id="infinityMatrix">
+    <div class="matrix-header">
+      <h2 class="matrix-header__title">Infinity Matrix</h2>
+      <p class="matrix-header__subtitle" id="matrixSubtitle">Explore endless possibilities</p>
+    </div>
+
+    <!-- Genre / Filter Pill Bar -->
+    <div class="matrix-pills" id="matrixPills">
+      <button class="matrix-pill matrix-pill--trending active" data-filter="trending">🔥 Trending</button>
+      <button class="matrix-pill" data-filter="anime">Anime</button>
+      <button class="matrix-pill" data-filter="tv-series">TV Series</button>
+      <button class="matrix-pill" data-filter="movies">Movies</button>
+      <button class="matrix-pill" data-filter="bl-gl">BL/GL</button>
+      <button class="matrix-pill" data-filter="sci-fi">Sci-Fi</button>
+      <button class="matrix-pill" data-filter="marvel-dc">Marvel/DC</button>
+      <button class="matrix-pill" data-filter="manga">Manga</button>
+      <button class="matrix-pill" data-filter="new-releases">New Releases</button>
+      <button class="matrix-pill" data-filter="completed">Completed Series</button>
+      <button class="matrix-pill matrix-pill--mood" data-filter="feel-good">😊 Feel-good</button>
+      <button class="matrix-pill matrix-pill--mood" data-filter="dark-gritty">🌑 Dark & Gritty</button>
+      <button class="matrix-pill matrix-pill--mood" data-filter="short-binge">⚡ Short Binge (&lt;12 eps)</button>
+    </div>
+
+    <!-- Matrix Search -->
+    <div class="matrix-search">
+      <span class="matrix-search__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </span>
+      <input type="text" class="matrix-search__input" id="matrixSearchInput"
+             placeholder="Search the Infinity Matrix…" autocomplete="off">
+    </div>
+
+    <!-- Search Results Overtake -->
+    <div class="matrix-grid hidden" id="matrixSearchResults" style="margin-top: 20px;"></div>
+
+    <!-- Genre Row Sections -->
+    <div id="matrixSections">
+      <!-- Sections injected by app.js -->
+    </div>
+
+    <!-- Infinite Grid (continuous scroll after genre rows) -->
+    <div class="matrix-grid" id="matrixGrid">
+      <!-- Cards injected by app.js -->
+    </div>
+
+    <!-- Loading shimmer -->
+    <div class="hidden" id="matrixLoading" style="margin-top:20px; text-align:center; padding: 20px; color: var(--text-muted); font-size: 14px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spinner" style="animation: spin 1s linear infinite; margin-bottom: 10px;">
+        <line x1="12" y1="2" x2="12" y2="6"></line>
+        <line x1="12" y1="18" x2="12" y2="22"></line>
+        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+        <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+        <line x1="2" y1="12" x2="6" y2="12"></line>
+        <line x1="18" y1="12" x2="22" y2="12"></line>
+        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+        <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+      </svg>
+      <div>Loading more titles...</div>
+      <style>
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+      </style>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       INSIGHTS HUB (Slide-in Panel)
+       ============================================================ -->
+  <div class="insights-backdrop" id="insightsBackdrop"></div>
+  <aside class="insights-panel" id="insightsPanel">
+    <div class="insights-panel__header">
+      <h2 class="insights-panel__title">Insights Hub</h2>
+      <button class="insights-panel__close" id="insightsClose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:20px;height:20px">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Internal Tabs -->
+    <div class="insights-tabs" id="insightsTabs">
+      <button class="insights-tab active" data-tab="overview">Overview</button>
+      <button class="insights-tab" data-tab="analytics">Analytics</button>
+      <button class="insights-tab" data-tab="oracle">Oracle</button>
+      <button class="insights-tab" data-tab="achievements">Achievements</button>
+    </div>
+
+    <!-- Content Area -->
+    <div class="insights-content" id="insightsContent">
+      <!-- Tab content injected by app.js -->
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       MARK AS WATCHED MODAL
+       ============================================================ -->
+  <div class="modal-backdrop" id="markWatchedBackdrop">
+    <div class="modal" id="markWatchedModal">
+      <h3 class="modal__headline">Nice! When did you finish this? 🎉</h3>
+      <button class="modal__primary-btn" id="completedTodayBtn">
+        Completed today ✅
+      </button>
+      <p class="modal__approx-label">Not sure exactly? Pick roughly:</p>
+      <div class="modal__approx-pills" id="approxPills">
+        <button class="modal__approx-pill" data-days="0">Today</button>
+        <button class="modal__approx-pill" data-days="1">Yesterday</button>
+        <button class="modal__approx-pill" data-days="3">2–3 days ago</button>
+        <button class="modal__approx-pill" data-days="7">About a week ago</button>
+        <button class="modal__approx-pill" data-days="18">2–3 weeks ago</button>
+        <button class="modal__approx-pill" data-days="30">About a month ago</button>
+        <button class="modal__approx-pill" data-days="75">2–3 months ago</button>
+        <button class="modal__approx-pill" data-days="180">6+ months ago</button>
+        <button class="modal__approx-pill" data-days="365">Over a year ago</button>
+      </div>
+      <button class="modal__exact-toggle" id="exactDateToggle">I know the exact date</button>
+      <div class="modal__date-picker" id="datePicker">
+        <input type="date" id="exactDate">
+      </div>
+      <button class="modal__skip" id="skipDateBtn">I'll skip this, just mark it done</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       COMMAND PALETTE (Ctrl+K / Cmd+K)
+       ============================================================ -->
+  <div class="command-palette-backdrop" id="cmdPaletteBackdrop">
+    <div class="command-palette" id="cmdPalette">
+      <div class="command-palette__input-wrapper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" class="command-palette__input" id="cmdPaletteInput"
+               placeholder="Jump to category, insights, or title…" autocomplete="off">
+        <span class="command-palette__kbd">ESC</span>
+      </div>
+      <div class="command-palette__results" id="cmdPaletteResults">
+        <!-- Results injected by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       UNDO TOAST CONTAINER
+       ============================================================ -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ============================================================
+       CONFETTI CONTAINER
+       ============================================================ -->
+  <div class="confetti-container" id="confettiContainer"></div>
+
+  <!-- ============================================================
+       PROFILE PANEL
+       ============================================================ -->
+  <div class="profile-backdrop" id="profileBackdrop"></div>
+  <aside class="profile-panel" id="profilePanel">
+    <!-- Profile Card Banner + Avatar -->
+    <div class="profile-banner" id="profileBanner">
+      <div class="profile-banner__gradient" id="profileBannerGradient"></div>
+      <button class="profile-banner__edit" id="profileBannerEdit" title="Change banner color">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </button>
+      <!-- Color picker palette (hidden by default) -->
+      <div class="profile-banner__palette hidden" id="profilePalette">
+        <button class="palette-swatch" data-gradient="linear-gradient(135deg,#22E5D0,#9B5CFF)" style="background:linear-gradient(135deg,#22E5D0,#9B5CFF)"></button>
+        <button class="palette-swatch" data-gradient="linear-gradient(135deg,#FF6B6B,#FFD93D)" style="background:linear-gradient(135deg,#FF6B6B,#FFD93D)"></button>
+        <button class="palette-swatch" data-gradient="linear-gradient(135deg,#667EEA,#764BA2)" style="background:linear-gradient(135deg,#667EEA,#764BA2)"></button>
+        <button class="palette-swatch" data-gradient="linear-gradient(135deg,#f953c6,#b91d73)" style="background:linear-gradient(135deg,#f953c6,#b91d73)"></button>
+        <button class="palette-swatch" data-gradient="linear-gradient(135deg,#0F2027,#203A43,#2C5364)" style="background:linear-gradient(135deg,#0F2027,#203A43,#2C5364)"></button>
+        <button class="palette-swatch" data-gradient="linear-gradient(135deg,#134E5E,#71B280)" style="background:linear-gradient(135deg,#134E5E,#71B280)"></button>
+      </div>
+    </div>
+
+    <div class="profile-panel__header">
+      <div class="profile-avatar-area">
+        <div class="profile-avatar-ring">
+          <div class="profile-avatar-ring__inner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+        </div>
+        <div class="profile-avatar-info">
+          <h2 class="profile-name">Eclipse User</h2>
+          <div class="profile-streak" id="profileStreakDisplay">🔥 Day 1 - start your streak!</div>
+        </div>
+      </div>
+      <button class="insights-panel__close" id="profileClose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:20px;height:20px">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mini stat bar -->
+    <div class="profile-stats-bar" id="profileStatsBar">
+      <!-- Injected by JS -->
+    </div>
+
+    <!-- Theme Switcher -->
+    <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-subtle);">
+      <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 0.08em;">Aesthetic Theme</div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="themeSwitcher">
+        <button class="theme-pill active" data-theme="default">Crimson Ash</button>
+        <button class="theme-pill" data-theme="theme-cyberpunk">Cyberpunk</button>
+        <button class="theme-pill" data-theme="theme-midnight-gold">Midnight Gold</button>
+        <button class="theme-pill" data-theme="theme-neon-sakura">Neon Sakura</button>
+      </div>
+    </div>
+
+    <!-- Profile Tabs -->
+    <div class="profile-tabs" id="profileTabs">
+      <button class="profile-tab active" data-ptab="progress">In Progress</button>
+      <button class="profile-tab" data-ptab="library">My Library</button>
+      <button class="profile-tab" data-ptab="completed">Completed</button>
+      <button class="profile-tab" data-ptab="friends">Friends</button>
+    </div>
+
+    <!-- Profile Content -->
+    <div class="insights-content" id="profileContent">
+      <!-- Injected by JS -->
+    </div>
+
+    <!-- Profile Footer / Logout -->
+    <div style="padding: 16px 20px; border-top: 1px solid var(--border-subtle); margin-top: auto;">
+      <button class="profile-logout-btn" id="profileLogoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- TITLE LIST PANEL (drill-down from insights cards) -->
+  <div class="titlelist-backdrop" id="titlelistBackdrop"></div>
+  <aside class="titlelist-panel" id="titlelistPanel">
+    <div class="titlelist-panel__header">
+      <button class="titlelist-back" id="titlelistBack">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:18px;height:18px">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Back
+      </button>
+      <h3 class="titlelist-panel__title" id="titlelistTitle">Titles</h3>
+      <button class="insights-panel__close" id="titlelistClose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:20px;height:20px">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="titlelist-filters" id="titlelistFilters">
+      <!-- Status filter pills injected by JS -->
+    </div>
+    <div class="titlelist-content" id="titlelistContent">
+      <!-- List items injected by JS -->
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       INFO MODAL
+       ============================================================ -->
+  <div class="modal-backdrop" id="infoModalBackdrop"></div>
+  <div class="info-modal" id="infoModal">
+    <button class="info-modal__close" id="infoModalClose">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+    
+    <div class="info-modal__hero" id="infoModalHero">
+      <img src="" id="infoModalPoster" alt="" class="info-modal__poster" onerror="this.style.display='none'" />
+      <div class="info-modal__hero-content">
+        <h2 class="info-modal__title" id="infoModalTitle"></h2>
+        <div class="info-modal__meta" id="infoModalMeta"></div>
+        <p class="info-modal__desc" id="infoModalDesc"></p>
+      </div>
+    </div>
+
+    <div class="info-modal__section">
+      <h3 class="info-modal__section-title">Cast & Characters</h3>
+      <div class="info-modal__cast-list" id="infoModalCast">
+        <div class="info-modal__loading">Loading details...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FLOATING EXPLORE FAB
+       ============================================================ -->
+  <button class="explore-fab" id="exploreFab">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+    </svg>
+    Explore
+  </button>
+
+  <!-- ============================================================
+       6-Server Failover Player Modal
+       ============================================================ -->
+  <div id="playerModal" class="player-overlay-modal hidden" style="display:none;">
+    <div class="player-overlay-backdrop" id="closePlayerOverlay"></div>
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="media-title-group">
+          <h3 id="modalMediaTitle" class="modal-title">Title</h3>
+          <span id="modalMediaMeta" class="modal-sub">2026 • 4K / THEATER PRINT</span>
+        </div>
+
+        <div class="player-controls-row">
+          <button id="nextServerBtn" class="action-btn primary-btn" style="padding: 0.5rem 1rem; border-radius: 8px; font-weight: bold; background: var(--accent-gradient); color: white; display: flex; align-items: center; gap: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <span id="nextServerText">Next Server (1/9)</span>
+          </button>
+          
+          <div class="server-selector custom-select-wrapper">
+            <div class="custom-select" id="customServerDropdown">
+              <div class="select-trigger" id="selectTrigger">
+                <div class="selected-content">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <span id="selectedServerName">Nontongo (Premium HD)</span>
+                </div>
+                <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              
+              <div class="select-options" id="selectOptions">
+                <div class="select-option" data-value="nontongo">
+                  <div class="option-text">
+                    <span class="option-title">Nontongo</span>
+                    <span class="option-desc">Highest Quality & Best UI</span>
+                  </div>
+                </div>
+
+                <div class="select-option" data-value="vidlink">
+                  <div class="option-text">
+                    <span class="option-title">VidLink Pro</span>
+                    <span class="option-desc">Ultra Fast Speeds</span>
+                  </div>
+                </div>
+
+                <div class="select-option" data-value="2embed">
+                  <div class="option-text">
+                    <span class="option-title">2Embed</span>
+                    <span class="option-desc">Huge Backup Library</span>
+                  </div>
+                </div>
+
+                <div class="select-option" data-value="vidsrc">
+                  <div class="option-text">
+                    <span class="option-title">VidSrc (IN/GLOBAL)</span>
+                    <span class="option-desc">Best for Regional/Hindi</span>
+                  </div>
+                </div>
+
+                <div class="select-option" data-value="smashy">
+                  <div class="option-text">
+                    <span class="option-title">SmashyStream</span>
+                    <span class="option-desc">High Success Rate</span>
+                  </div>
+                </div>
+
+                <div class="select-option" data-value="autoembed">
+                  <div class="option-text">
+                    <span class="option-title">AutoEmbed (Global)</span>
+                    <span class="option-desc">Aggregated Fallback</span>
+                  </div>
+                </div>
+
+                <div class="select-option" data-value="vidsrc-pm">
+                  <div class="option-text">
+                    <span class="option-title">VidSrc PM</span>
+                    <span class="option-desc">Fast Alternative</span>
+                  </div>
+                </div>
+
+                <div class="select-option" data-value="superembed">
+                  <div class="option-text">
+                    <span class="option-title">SuperEmbed</span>
+                    <span class="option-desc">HD Stream</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <input type="hidden" id="serverSelect" value="nontongo">
+            <span id="serverStatus" style="font-size: 0.7rem; color: var(--success, #22E5D0); margin-left: 12px; white-space: nowrap;">● LIVE</span>
+          </div>
+
+          <button id="closePlayerBtn" class="close-icon-btn" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;" aria-label="Close Player">&times;</button>
+        </div>
+      </div>
+
+      <!-- TV Episode Controls -->
+      <div id="tvEpisodeControls" class="tv-controls-bar hidden" style="display: flex; gap: 10px; padding: 10px; background: rgba(0,0,0,0.5);">
+        <div class="tv-selector-group" style="display:flex; align-items:center; gap: 5px;">
+          <label for="seasonSelect" style="color:var(--text-muted);font-size:12px;font-weight:bold;">SEASON:</label>
+          <select id="seasonSelect" class="tv-select" style="background:var(--surface);color:var(--text);border:1px solid var(--border-subtle);border-radius:4px;padding:4px 8px;">
+            <option value="1">Loading...</option>
+          </select>
+        </div>
+        <div class="tv-selector-group" style="display:flex; align-items:center; gap: 5px;">
+          <label for="episodeSelect" style="color:var(--text-muted);font-size:12px;font-weight:bold;">EPISODE:</label>
+          <select id="episodeSelect" class="tv-select" style="background:var(--surface);color:var(--text);border:1px solid var(--border-subtle);border-radius:4px;padding:4px 8px;">
+            <option value="1">Loading...</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="video-wrapper" style="position:relative; width:100%; padding-top:56.25%;">
+        <iframe id="videoIframe" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;" allowfullscreen frameborder="0" allow="autoplay; encrypted-media"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js?v=7.1"></script>
+
+  <script>
+    // Fail-safe: if app.js completely fails to load due to CDN blocks (Firebase),
+    // we must ensure the user can still bypass the login screen.
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const overlay = document.getElementById('authOverlay');
+        if (overlay && !overlay.classList.contains('hidden') && localStorage.getItem('eclipse_username')) {
+          overlay.style.display = 'none';
+        }
+      }, 2000);
+    });
+  </script>
+</body>
+</html>

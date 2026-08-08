@@ -1,0 +1,11 @@
+{
+  "name": "cinepulse",
+  "version": "1.0.0",
+  "type": "module",
+  "devDependencies": {
+    "firebase-tools": "^15.25.1"
+  },
+  "dependencies": {
+    "puppeteer": "^25.5.0"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "cineplus-495a2"
+  },
+  "targets": {
+    "cineplus-495a2": {
+      "hosting": {
+        "eclipse": [
+          "eclipse-stream"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
