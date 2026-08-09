@@ -919,22 +919,46 @@ function updateStreakDisplay() {
 // ============================================================
 // INFO MODAL (card click → detail view)
 // ============================================================
-function openInfoModal(item) {
+async function openInfoModal(item) {
   const modal = $('#infoModal');
   if (!modal) return;
+
   const img = modal.querySelector('.info-modal__poster');
   const title = modal.querySelector('.info-modal__title');
   const meta = modal.querySelector('.info-modal__meta');
   const desc = modal.querySelector('.info-modal__desc');
-  if (img) img.src = item.poster || '';
+  const hero = modal.querySelector('#infoModalHero');
+
+  // Backdrop / Title picture behind description
+  const backdropUrl = item.backdrop || item.poster || (typeof getPoster === 'function' ? getPoster(item) : '');
+  if (hero) {
+    if (backdropUrl) {
+      hero.style.background = `linear-gradient(180deg, rgba(15, 18, 28, 0.75) 0%, rgba(15, 18, 28, 0.95) 100%), url('${backdropUrl}') center/cover no-repeat`;
+    } else {
+      hero.style.background = `linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%)`;
+    }
+  }
+
+  if (img) {
+    img.src = item.poster || backdropUrl || '';
+    img.style.display = 'block';
+  }
   if (title) title.textContent = item.title || '';
-  if (meta) meta.textContent = [item.category, item.genre, item.rating ? '★ ' + item.rating : ''].filter(Boolean).join(' · ');
-  if (desc) desc.textContent = item.description || item.reason || '';
+
+  let epsText = '';
+  if (item.totalEpisodes && item.totalEpisodes !== '?') epsText = ` · Ep: ${item.totalEpisodes}`;
+  else if (item.episodes) epsText = ` · Ep: ${item.episodes}`;
+  else if (item.chapters) epsText = ` · Ch: ${item.chapters}`;
+
+  if (meta) meta.textContent = [item.category, item.genre, item.rating ? '★ ' + item.rating : ''].filter(Boolean).join(' · ') + epsText;
+  if (desc) desc.textContent = item.description || item.reason || item.overview || 'No synopsis available for this title.';
+
   // Watch button
   const watchBtn = modal.querySelector('#infoModalWatchBtn');
   if (watchBtn) {
     watchBtn.onclick = () => { closeInfoModal(); window.openPlayer(item); };
   }
+
   // Add to list button
   const addBtn = modal.querySelector('#infoModalAddBtn');
   if (addBtn) {
@@ -967,8 +991,65 @@ function openInfoModal(item) {
       };
     }
   }
+
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  // Fetch cast asynchronously with fallbacks across Jikan, TMDB, and TVMaze
+  const castContainer = modal.querySelector('#infoModalCast');
+  if (castContainer) {
+    castContainer.innerHTML = '<div class="info-modal__loading">Loading live cast details...</div>';
+    
+    try {
+      let cast = [];
+      const cat = (item.category || '').toLowerCase();
+      const rawId = String(item.id || item.mal_id || '');
+
+      // 1. If Anime with MAL ID
+      if (cat === 'anime' && (rawId.startsWith('mal_') || item.mal_id)) {
+        const malId = rawId.replace('mal_', '') || item.mal_id;
+        cast = await fetchJikanCharacters(malId);
+      }
+
+      // 2. Try TMDB resolution for any category (Movies, Series, Kdrama, BL, GL, Thai, Anime)
+      if (!cast || cast.length === 0) {
+        let tmdbId = await resolveTMDBId(item);
+        if (tmdbId) {
+          cast = await fetchTMDBCast(tmdbId, item.category, item.title);
+        }
+      }
+
+      // 3. TVMaze title fallback for non-movies
+      if ((!cast || cast.length === 0) && item.title) {
+        try {
+          const searchRes = await fetch(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(item.title)}`, { signal: AbortSignal.timeout(5000) });
+          if (searchRes.ok) {
+            const searchData = await searchRes.json();
+            if (searchData && searchData.length > 0) {
+              cast = await fetchTVMazeCast(searchData[0].show.id);
+            }
+          }
+        } catch (e) {
+          console.warn('TVMaze cast fallback failed:', e);
+        }
+      }
+
+      if (!cast || cast.length === 0) {
+        castContainer.innerHTML = '<div class="info-modal__loading" style="color:var(--text-muted); font-size:13px;">No cast details available for this title.</div>';
+      } else {
+        castContainer.innerHTML = cast.slice(0, 10).map(c => `
+          <div class="cast-card">
+            <img src="${c.image || 'https://placehold.co/100x100/1a1a2e/ffffff?text=' + encodeURIComponent(c.name.charAt(0))}" alt="${c.name}" onerror="this.src='https://placehold.co/100x100/1a1a2e/ffffff?text=?'">
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; line-height: 1.2;">${c.name}</div>
+            <div style="font-size: 10px; color: var(--text-muted);">${c.role || 'Actor'}</div>
+          </div>
+        `).join('');
+      }
+    } catch (err) {
+      console.error('Error loading cast:', err);
+      castContainer.innerHTML = '<div class="info-modal__loading" style="color:var(--text-muted); font-size:13px;">Unable to load live cast.</div>';
+    }
+  }
 }
 
 function closeInfoModal() {

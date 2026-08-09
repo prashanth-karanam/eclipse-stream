@@ -3458,6 +3458,9 @@ input, textarea {
 
 .info-modal__hero {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: 20px;
   padding: 24px;
   background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%);
@@ -3465,18 +3468,17 @@ input, textarea {
 }
 
 .info-modal__poster {
-  width: 120px;
-  height: 180px;
+  width: 140px;
+  height: 210px;
   border-radius: 12px;
   object-fit: cover;
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 
 .info-modal__hero-content {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  align-items: center;
 }
 
 .info-modal__title {
@@ -3493,12 +3495,19 @@ input, textarea {
   display: flex;
   gap: 12px;
   align-items: center;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
 }
 
 .info-modal__desc {
-  font-size: 14px;
-  color: var(--text-secondary);
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.9);
   line-height: 1.5;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
   display: -webkit-box;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;

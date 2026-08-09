@@ -536,28 +536,34 @@ export const fetchTVMazeCast = async (tvmazeId) => {
 };
 
 export const fetchTMDBCast = async (tmdbId, category = 'movies', titleName = '') => {
-  const type = category === 'series' ? 'tv' : 'movie';
-  const data = await tmdbFetch(`/${type}/${tmdbId}/credits`);
+  const catLower = (category || '').toLowerCase();
+  const isTv = ['series', 'kdrama', 'bl', 'gl', 'thai', 'tv', 'anime'].includes(catLower);
+  const type = isTv ? 'tv' : 'movie';
   
-  if (data && data.cast) {
-    return data.cast.slice(0, 6).map(c => ({
+  let data = await tmdbFetch(`/${type}/${tmdbId}/credits`);
+  
+  if ((!data || !data.cast || data.cast.length === 0)) {
+    const oppType = isTv ? 'movie' : 'tv';
+    data = await tmdbFetch(`/${oppType}/${tmdbId}/credits`);
+  }
+
+  if (data && data.cast && data.cast.length > 0) {
+    return data.cast.slice(0, 10).map(c => ({
       name: c.name,
-      role: c.character,
-      image: proxyImage(c.profile_path ? `${TMDB_IMG_BASE}${c.profile_path}` : null)
+      role: c.character || c.known_for_department || 'Actor',
+      image: c.profile_path ? `${TMDB_IMG_BASE}${c.profile_path}` : FALLBACK_POSTER
     }));
   }
   
-  // TVMaze fallback if TMDB fails or key missing
+  // TVMaze fallback if TMDB fails
   if (titleName) {
     try {
-      if (category === 'series') {
-        const searchRes = await fetch(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(titleName)}`, { signal: AbortSignal.timeout(6000) });
-        if (searchRes.ok) {
-          const searchData = await searchRes.json();
-          if (searchData.length > 0) {
-            const tvmazeId = searchData[0].show.id;
-            return await fetchTVMazeCast(tvmazeId);
-          }
+      const searchRes = await fetch(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(titleName)}`, { signal: AbortSignal.timeout(5000) });
+      if (searchRes.ok) {
+        const searchData = await searchRes.json();
+        if (searchData && searchData.length > 0) {
+          const tvmazeId = searchData[0].show.id;
+          return await fetchTVMazeCast(tvmazeId);
         }
       }
     } catch(e) {
