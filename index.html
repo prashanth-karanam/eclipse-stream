@@ -6,7 +6,7 @@
   <meta name="referrer" content="no-referrer">
   <meta name="description" content="Eclipse — Track your anime, manhwa, series, and movies with a beautiful cinematic interface">
   <title>Eclipse — Your Cinematic Universe</title>
-  <link rel="stylesheet" href="styles.css?v=7.9">
+  <link rel="stylesheet" href="styles.css?v=8.0">
 </head>
 <body>
 
@@ -145,7 +145,7 @@
        ============================================================ -->
   <section class="hero-zone" id="heroZone">
     <!-- Populated state (shown when user has data) -->
-    <div class="hero-populated" id="heroPopulated">
+    <div class="hero-populated hidden" id="heroPopulated">
       <div class="hero-card">
         <div class="hero-card__poster">
           <div class="hero-card__poster-placeholder">
@@ -163,15 +163,15 @@
         </div>
         <div class="hero-card__info">
           <div class="hero-card__label" id="heroLabel">CONTINUE WATCHING</div>
-          <h2 class="hero-card__title" id="heroTitle">Jujutsu Kaisen S2</h2>
+          <h2 class="hero-card__title" id="heroTitle">Loading Title...</h2>
           <!-- Mini-tabs: Planning / In-Progress queue (populated by JS) -->
           <div class="hero-mini-tabs" id="heroMiniTabs" style="display:none;"></div>
-          <p class="hero-card__meta" id="heroMeta">Anime · Action · 23 episodes</p>
+          <p class="hero-card__meta" id="heroMeta">Title Details</p>
           <div class="hero-card__progress">
             <div class="hero-card__progress-bar">
-              <div class="hero-card__progress-fill" id="heroProgress" style="width: 65%"></div>
+              <div class="hero-card__progress-fill" id="heroProgress" style="width: 0%"></div>
             </div>
-            <span class="hero-card__progress-text" id="heroProgressText">Episode 15 of 23</span>
+            <span class="hero-card__progress-text" id="heroProgressText">...</span>
           </div>
           <div class="hero-card__actions">
             <button class="btn-primary" id="heroPlayBtn">
@@ -752,7 +752,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=7.9"></script>
+  <script type="module" src="app.js?v=8.0"></script>
 
   <script>
     // Fail-safe: if app.js completely fails to load due to CDN blocks (Firebase),

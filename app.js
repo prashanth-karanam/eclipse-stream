@@ -3799,8 +3799,9 @@ function initCommunityAndProfileViewer() {
   ];
 
   async function renderCommunityRosterModal(filterQuery = '') {
-    if (!commRosterContainer) return;
-    commRosterContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">Loading community members...</div>`;
+    const container = $('#commRosterContainer');
+    if (!container) return;
+    container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">Loading community members...</div>`;
 
     const membersMap = new Map();
 
@@ -3846,7 +3847,7 @@ function initCommunityAndProfileViewer() {
     }
 
     if (members.length === 0) {
-      commRosterContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">No member found matching "${filterQuery}".</div>`;
+      container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">No member found matching "${filterQuery}".</div>`;
       return;
     }
 
@@ -3855,7 +3856,7 @@ function initCommunityAndProfileViewer() {
     members.forEach(({ uid, username, email, role }) => {
       const isSelf = state.user && uid === state.user.uid;
       html += `
-        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:12px; margin-bottom:10px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--border-focus)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
+        <div class="comm-member-card" data-uid="${uid}" data-username="${username}" data-email="${email}" style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:12px; margin-bottom:10px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--border-focus)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
           <div style="display:flex; align-items:center; gap:12px;">
             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(username)}" style="width:42px; height:42px; border-radius:50%; background:var(--bg-surface); border:1px solid var(--border-subtle);">
             <div>
@@ -3870,14 +3871,14 @@ function initCommunityAndProfileViewer() {
       `;
     });
 
-    commRosterContainer.innerHTML = html;
+    container.innerHTML = html;
 
-    // Attach View Profile Click Listeners
-    commRosterContainer.querySelectorAll('.view-user-profile-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const targetUid = e.currentTarget.dataset.uid;
-        const targetUsername = e.currentTarget.dataset.username;
-        const targetEmail = e.currentTarget.dataset.email;
+    // Attach View Profile Click Listeners on cards & buttons
+    container.querySelectorAll('.comm-member-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        const targetUid = card.dataset.uid;
+        const targetUsername = card.dataset.username;
+        const targetEmail = card.dataset.email;
         openUserProfileModal(targetUid, targetUsername, targetEmail);
       });
     });
