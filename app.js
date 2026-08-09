@@ -2916,6 +2916,13 @@ window.decrementTitleProgress = async function(titleId) {
   title.status = 'in-progress';
   state.justCompleted = false;
   
+  // Bump the title to the very front of state.titles so it becomes the active title on Hero Card
+  const idx = state.titles.indexOf(title);
+  if (idx > 0) {
+    state.titles.splice(idx, 1);
+    state.titles.unshift(title);
+  }
+  
   const isMovie = title.category === 'movies';
   const isReading = title.category === 'manhwa';
   const unitHours = isReading ? 0.1 : isMovie ? ((title.runtime || 120) / 60) : 0.4;
@@ -2934,6 +2941,9 @@ window.decrementTitleProgress = async function(titleId) {
     } catch(err) { console.error('Failed to sync decrement:', err); }
   }
   
+  const miniTabsEl = $('#heroMiniTabs');
+  if (miniTabsEl) delete miniTabsEl.dataset.renderedIds;
+
   updateHeroZone();
   updateStrip();
   if (state.insightsOpen) renderInsightsTab(state.insightsTab);
