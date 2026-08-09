@@ -2085,6 +2085,10 @@ async function loadSectionPage(sectionId, page) {
     return;
   } finally {
     loadingSections[sectionId] = false;
+    if (page === 1) {
+      const loadingEl = document.getElementById(`loading-${sectionId}`);
+      if (loadingEl) loadingEl.remove();
+    }
   }
 }
 
