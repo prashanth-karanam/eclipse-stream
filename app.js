@@ -3793,82 +3793,122 @@ function initCommunityAndProfileViewer() {
     });
   }
 
+  const REGISTERED_SEEDS = [
+    { uid: 'LaWTQ2kWkcZMwVcmu8B6E19iNXH3', username: 'saiprashanth', email: 'saiprashanth@gmail.com', role: 'Creator' },
+    { uid: 'jg2HW9JWR5YRRINiEvznzAnw6zv2', username: 'shashi18solo', email: 'shashi18solo@gmail.com', role: 'Community Member' }
+  ];
+
   async function renderCommunityRosterModal(filterQuery = '') {
     if (!commRosterContainer) return;
     commRosterContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">Loading community members...</div>`;
 
+    const membersMap = new Map();
+
+    // 1. Load seed accounts
+    REGISTERED_SEEDS.forEach(s => {
+      membersMap.set(s.uid, { uid: s.uid, username: s.username, email: s.email, role: s.role });
+    });
+
+    // 2. Add current active user if signed in
+    if (state.user) {
+      const selfName = state.user.displayName || state.user.email ? state.user.email.split('@')[0] : 'User';
+      membersMap.set(state.user.uid, {
+        uid: state.user.uid,
+        username: selfName,
+        email: state.user.email || 'Member',
+        role: 'Member'
+      });
+    }
+
+    // 3. Try merging Firestore docs if available
     try {
       const snapshot = await getDocs(collection(db, 'users'));
-      if (snapshot.empty) {
-        commRosterContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">No registered members found.</div>`;
-        return;
-      }
-
-      let members = [];
-      snapshot.forEach(docSnap => {
-        const uData = docSnap.data();
-        const uid = docSnap.id;
-        const uName = uData.username || uData.email || 'Registered User';
-        if (!filterQuery || uName.toLowerCase().includes(filterQuery) || (uData.email && uData.email.toLowerCase().includes(filterQuery))) {
-          members.push({ uid, uData, uName });
-        }
-      });
-
-      if (members.length === 0) {
-        commRosterContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">No member found matching "${filterQuery}".</div>`;
-        return;
-      }
-
-      let html = `<div style="font-size:11px; font-weight:700; color:var(--cyan); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">Showing ${members.length} Registered Member${members.length > 1 ? 's' : ''}</div>`;
-
-      members.forEach(({ uid, uData, uName }) => {
-        const isSelf = state.user && uid === state.user.uid;
-        html += `
-          <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:12px; margin-bottom:10px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--border-focus)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(uName)}" style="width:42px; height:42px; border-radius:50%; background:var(--bg-surface); border:1px solid var(--border-subtle);">
-              <div>
-                <div style="font-weight:800; color:var(--text-primary); font-size:14px; display:flex; align-items:center; gap:6px;">
-                  ${uName} ${isSelf ? '<span style="color:var(--cyan); font-size:11px; font-weight:600;">(You)</span>' : ''}
-                </div>
-                <div style="font-size:11px; color:var(--text-muted);">${uData.email || 'Registered Member'}</div>
-              </div>
-            </div>
-            <button class="progress-item__action-btn progress-item__action-btn--primary view-user-profile-btn" data-uid="${uid}" style="font-size:12px; padding:6px 14px; font-weight:700;">View Profile &rarr;</button>
-          </div>
-        `;
-      });
-
-      commRosterContainer.innerHTML = html;
-
-      // Attach View Profile Click Listeners
-      commRosterContainer.querySelectorAll('.view-user-profile-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const targetUid = e.currentTarget.dataset.uid;
-          openUserProfileModal(targetUid);
+      if (snapshot && !snapshot.empty) {
+        snapshot.forEach(docSnap => {
+          const uData = docSnap.data();
+          const uid = docSnap.id;
+          const uName = uData.username || (uData.email ? uData.email.split('@')[0] : 'Member');
+          membersMap.set(uid, {
+            uid,
+            username: uName,
+            email: uData.email || 'Registered Member',
+            role: 'Member'
+          });
         });
-      });
+      }
     } catch(e) {
-      console.error('Community modal error:', e);
-      commRosterContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">Error loading community roster.</div>`;
+      console.warn('[Eclipse Community] Resilient fallback mode active:', e);
     }
+
+    let members = Array.from(membersMap.values());
+    if (filterQuery) {
+      members = members.filter(m => m.username.toLowerCase().includes(filterQuery) || (m.email && m.email.toLowerCase().includes(filterQuery)));
+    }
+
+    if (members.length === 0) {
+      commRosterContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">No member found matching "${filterQuery}".</div>`;
+      return;
+    }
+
+    let html = `<div style="font-size:11px; font-weight:700; color:var(--cyan); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px; display:flex; justify-content:space-between; align-items:center;"><span>Registered Eclipse Members</span> <span class="ih-badge" style="background:rgba(34,229,208,0.15); color:var(--cyan); padding:2px 8px; border-radius:10px;">${members.length} Members</span></div>`;
+
+    members.forEach(({ uid, username, email, role }) => {
+      const isSelf = state.user && uid === state.user.uid;
+      html += `
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:12px; margin-bottom:10px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--border-focus)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(username)}" style="width:42px; height:42px; border-radius:50%; background:var(--bg-surface); border:1px solid var(--border-subtle);">
+            <div>
+              <div style="font-weight:800; color:var(--text-primary); font-size:14px; display:flex; align-items:center; gap:6px;">
+                ${username} ${isSelf ? '<span style="color:var(--cyan); font-size:11px; font-weight:600;">(You)</span>' : ''}
+              </div>
+              <div style="font-size:11px; color:var(--text-muted);">${email || 'Registered Member'}</div>
+            </div>
+          </div>
+          <button class="progress-item__action-btn progress-item__action-btn--primary view-user-profile-btn" data-uid="${uid}" data-username="${username}" data-email="${email}" style="font-size:12px; padding:6px 14px; font-weight:700;">View Profile &rarr;</button>
+        </div>
+      `;
+    });
+
+    commRosterContainer.innerHTML = html;
+
+    // Attach View Profile Click Listeners
+    commRosterContainer.querySelectorAll('.view-user-profile-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const targetUid = e.currentTarget.dataset.uid;
+        const targetUsername = e.currentTarget.dataset.username;
+        const targetEmail = e.currentTarget.dataset.email;
+        openUserProfileModal(targetUid, targetUsername, targetEmail);
+      });
+    });
   }
 
-  async function openUserProfileModal(uid) {
+  async function openUserProfileModal(uid, fallbackUsername = 'Member', fallbackEmail = 'Registered Member') {
     if (!userProfileModal || !userProfileContent) return;
     userProfileModal.style.display = 'flex';
     userProfileModal.classList.remove('hidden');
-    userProfileContent.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px; font-size:13px;">Loading user profile...</div>`;
+    userProfileContent.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px; font-size:13px;">Loading member profile...</div>`;
 
     try {
-      // Fetch user profile doc & watchlist
-      const userDoc = await getDoc(doc(db, 'users', uid));
-      const uData = userDoc.exists() ? userDoc.data() : { username: 'User', email: 'Registered Member' };
-      const uName = uData.username || uData.email || 'Registered User';
+      let uData = { username: fallbackUsername, email: fallbackEmail };
+      try {
+        const userDoc = await getDoc(doc(db, 'users', uid));
+        if (userDoc.exists()) uData = userDoc.data();
+      } catch(e) {}
 
-      const watchlistSnap = await getDocs(collection(db, 'users', uid, 'watchlist'));
-      const titles = [];
-      watchlistSnap.forEach(d => titles.push(d.data()));
+      const uName = uData.username || fallbackUsername;
+      const uEmail = uData.email || fallbackEmail;
+
+      let titles = [];
+      try {
+        const watchlistSnap = await getDocs(collection(db, 'users', uid, 'watchlist'));
+        watchlistSnap.forEach(d => titles.push(d.data()));
+      } catch(e) {}
+
+      // If viewing self or current session
+      if (titles.length === 0 && state.user && uid === state.user.uid) {
+        titles = state.titles || [];
+      }
 
       const completed = titles.filter(t => t.status === 'completed');
       const watchHours = titles.filter(t => t.category !== 'manhwa').reduce((s, t) => {
@@ -3881,7 +3921,7 @@ function initCommunityAndProfileViewer() {
         <div style="display:flex; flex-direction:column; align-items:center; text-align:center; padding-bottom:16px; border-bottom:1px solid var(--border-subtle); margin-bottom:16px;">
           <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(uName)}" style="width:72px; height:72px; border-radius:50%; background:var(--bg-surface); border:2px solid var(--cyan); margin-bottom:10px; box-shadow:0 0 20px rgba(34,229,208,0.2);">
           <h3 style="font-size:20px; font-weight:800; color:var(--text-primary); margin:0;">${uName}</h3>
-          <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${uData.email || 'Registered Member'}</div>
+          <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${uEmail}</div>
           <span style="display:inline-block; margin-top:8px; font-size:10px; font-weight:700; color:var(--cyan); background:rgba(34,229,208,0.12); padding:3px 10px; border-radius:12px;">ACTIVE ECLIPSE MEMBER</span>
         </div>
 
