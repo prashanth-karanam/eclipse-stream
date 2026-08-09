@@ -14,14 +14,21 @@ const TMDB_IMG_ORIGINAL = 'https://image.tmdb.org/t/p/original'; // For backgrou
 const JIKAN_BASE_URL = 'https://api.jikan.moe/v4';
 
 const proxyFetchJson = async (url) => {
+  // First attempt direct fetch with short 2.5s timeout
+  try {
+    const directRes = await fetch(url, { signal: AbortSignal.timeout(2500) });
+    if (directRes.ok) return await directRes.json();
+  } catch(e) {}
+
   const proxies = [
     'https://api.allorigins.win/get?url=',
     'https://corsproxy.io/?',
+    'https://api.codetabs.com/v1/proxy?quest=',
     'https://thingproxy.freeboard.io/fetch/'
   ];
   for (let proxy of proxies) {
     try {
-      const proxyUrl = proxy.includes('allorigins') ? proxy + encodeURIComponent(url) : proxy + url;
+      const proxyUrl = proxy.includes('allorigins') || proxy.includes('codetabs') ? proxy + encodeURIComponent(url) : proxy + url;
       const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(6000) });
       if (!res.ok) continue;
       if (proxy.includes('allorigins')) {
@@ -275,12 +282,19 @@ export const fetchTopManhwa = async (page = 1) => {
   // Fallback: MangaDex public API — no key required
   try {
     const offset = (page - 1) * 20;
-    const mdRes = await fetch(
-      `https://api.mangadex.org/manga?limit=20&offset=${offset}&publicationDemographic[]=seinen&publicationDemographic[]=josei&originalLanguage[]=ko&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&includes[]=cover_art`,
-      { signal: AbortSignal.timeout(8000) }
-    );
-    if (mdRes.ok) {
-      const mdData = await mdRes.json();
+    const mdUrl = `https://api.mangadex.org/manga?limit=20&offset=${offset}&publicationDemographic[]=seinen&publicationDemographic[]=josei&originalLanguage[]=ko&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&includes[]=cover_art`;
+    
+    let mdData = null;
+    try {
+      const mdRes = await fetch(mdUrl, { signal: AbortSignal.timeout(4000) });
+      if (mdRes.ok) mdData = await mdRes.json();
+    } catch(e) {}
+
+    if (!mdData) {
+      mdData = await proxyFetchJson(mdUrl);
+    }
+
+    if (mdData && mdData.data) {
       const results = (mdData.data || []).map(manga => {
         const title = manga.attributes?.title?.en || manga.attributes?.title?.ko || Object.values(manga.attributes?.title || {})[0] || 'Unknown';
         const desc = manga.attributes?.description?.en || '';

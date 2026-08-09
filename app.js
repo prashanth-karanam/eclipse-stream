@@ -902,7 +902,6 @@ function checkAndUpdateStreak() {
 
     localStorage.setItem('cinepulse_streak', JSON.stringify(sdata));
     state.streak = streak;
-    updateStreakDisplay();
     return streak;
   } catch (e) {
     console.error('Streak calculation error:', e);
@@ -911,7 +910,8 @@ function checkAndUpdateStreak() {
 }
 
 function updateStreakDisplay() {
-  const streak = checkAndUpdateStreak();
+  const sdata = JSON.parse(localStorage.getItem('cinepulse_streak') || '{}');
+  const streak = sdata.streak || 1;
   const streakEls = document.querySelectorAll('.streak-count, #streakBadge, .hero-streak-count');
   streakEls.forEach(el => { el.textContent = streak; });
 }
@@ -1061,6 +1061,80 @@ function closeInfoModal() {
 // ============================================================
 // INSIGHTS HUB PANEL
 // ============================================================
+window._insightsExpandCategory = function(catKey) {
+  const container = document.getElementById('ihCategoryDetails');
+  if (!container) return;
+
+  const titles = state.titles || [];
+  const filtered = catKey === 'all' 
+    ? titles 
+    : titles.filter(t => t.category === catKey || (catKey === 'series' && ['kdrama','bl','gl','thai','series','tv'].includes(t.category)));
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="padding:14px; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid var(--border-subtle); color:var(--text-muted); font-size:12px; text-align:center;">No titles found in ${catKey === 'all' ? 'All Categories' : catKey}.</div>`;
+    return;
+  }
+
+  const catName = catKey === 'all' ? 'All Categories' : catKey.charAt(0).toUpperCase() + catKey.slice(1);
+
+  container.innerHTML = `
+    <div style="background:rgba(255,255,255,0.03); border-radius:14px; border:1px solid var(--border-subtle); padding:14px; margin-top:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h4 style="font-size:14px; font-weight:700; color:var(--cyan); margin:0;">${catName} (${filtered.length} titles)</h4>
+        <button onclick="document.getElementById('ihCategoryDetails').innerHTML=''" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:12px;">✕ Close</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px; max-height:260px; overflow-y:auto; padding-right:4px;">
+        ${filtered.map(t => {
+          const total = t.episodes || t.chapters || t.totalEpisodes || 0;
+          const isDone = t.status === 'completed';
+          return `
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 10px; background:rgba(255,255,255,0.02); border-radius:8px; font-size:12px;">
+              <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
+                <img src="${getPoster(t)}" style="width:24px; height:34px; object-fit:cover; border-radius:4px;" onerror="this.style.display='none'">
+                <div style="min-width:0; flex:1;">
+                  <div style="font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${t.title}</div>
+                  <div style="font-size:10px; color:var(--text-muted);">${t.category} · ${t.progress || 0}${total > 0 ? '/' + total : ''} ${t.category==='manhwa'?'ch':'ep'} ${isDone ? '· ✅ Done' : ''}</div>
+                </div>
+              </div>
+              <div style="display:flex; gap:4px; align-items:center; margin-left:8px;">
+                <button onclick="event.stopPropagation(); window.decrementTitleProgress('${t.id}')" style="background:rgba(255,255,255,0.1); border:none; color:#fff; border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer;" title="Remove 1 Ep">-1</button>
+                <button onclick="event.stopPropagation(); window.removeTitle('${t.id}')" style="background:rgba(255,75,75,0.2); border:none; color:#ff4b4b; border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer;" title="Delete Title">🗑️</button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+};
+
+window._insightsExpandGenre = function(genreName) {
+  const container = document.getElementById('ihGenreDetails');
+  if (!container) return;
+  const titles = state.titles || [];
+  const filtered = titles.filter(t => (t.genre || '').toLowerCase().includes(genreName.toLowerCase()));
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="padding:12px; background:rgba(255,255,255,0.03); border-radius:12px; color:var(--text-muted); font-size:12px; text-align:center;">No titles found for genre ${genreName}.</div>`;
+    return;
+  }
+  container.innerHTML = `
+    <div style="background:rgba(255,255,255,0.03); border-radius:14px; border:1px solid var(--border-subtle); padding:14px; margin-top:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h4 style="font-size:14px; font-weight:700; color:#FF8C42; margin:0;">Genre: ${genreName} (${filtered.length})</h4>
+        <button onclick="document.getElementById('ihGenreDetails').innerHTML=''" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:12px;">✕ Close</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto;">
+        ${filtered.map(t => `
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 10px; background:rgba(255,255,255,0.02); border-radius:8px; font-size:12px;">
+            <div style="font-weight:600; color:var(--text-primary); truncate;">${t.title}</div>
+            <div style="font-size:10px; color:var(--text-muted);">${t.category} · ${t.progress||0} ${t.category==='manhwa'?'ch':'ep'}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+};
+
 function openInsights() {
   state.insightsOpen = true;
   $('#insightsBackdrop').classList.add('open');
@@ -1170,23 +1244,49 @@ function renderOverviewTab() {
         </div>
       </div>
 
-      <!-- Category Donut-style breakdown -->
-      <div class="ih-section-title">Library by Category</div>
-      <div class="ih-cat-breakdown">
-        ${Object.entries(catCounts).map(([cat, cnt]) => {
-          const pct = Math.round((cnt / total) * 100);
+      <!-- Interactive Category Analytics Cards -->
+      <div class="ih-section-title">Category Analytics (Click to View Titles)</div>
+      <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:10px; margin-bottom:12px;">
+        ${[
+          { key:'anime', icon:'🎌', name:'Anime', clr:'#FF4B4B' },
+          { key:'manhwa', icon:'📖', name:'Manhwa', clr:'#9B5CFF' },
+          { key:'series', icon:'📺', name:'Series', clr:'#F59E0B' },
+          { key:'movies', icon:'🎬', name:'Movies', clr:'#22E5D0' }
+        ].map(cat => {
+          const catTitles = titles.filter(t => t.category === cat.key || (cat.key === 'series' && ['kdrama','bl','gl','thai','series','tv'].includes(t.category)));
+          const catDone = catTitles.filter(t => t.status === 'completed').length;
+          const watchedUnits = catTitles.reduce((s,t) => s + (t.progress||0), 0);
+          const hrs = cat.key === 'manhwa' ? 0 : (cat.key === 'movies' ? watchedUnits * 2 : (cat.key === 'series' ? watchedUnits * 0.7 : watchedUnits * 0.4));
+          const subText = cat.key === 'manhwa' ? `${watchedUnits} ch read` : `${hrs.toFixed(0)}h watched`;
+          
           return `
-            <div class="ih-cat-row">
-              <span class="ih-cat-row__icon">${catIcons[cat]}</span>
-              <span class="ih-cat-row__name">${cat.charAt(0).toUpperCase()+cat.slice(1)}</span>
-              <div class="ih-cat-row__track">
-                <div class="ih-cat-row__fill" style="width:${pct}%;background:${catColors[cat]};transition:width 0.8s cubic-bezier(0.22,1,0.36,1);"></div>
+            <div class="ih-stat" style="--clr:${cat.clr}; cursor:pointer; padding:12px; display:flex; flex-direction:column; align-items:flex-start;" onclick="window._insightsExpandCategory('${cat.key}')">
+              <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:4px;">
+                <span style="font-size:20px;">${cat.icon}</span>
+                <span style="font-size:10px; font-weight:700; color:var(--text-muted); background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:10px;">${catDone}/${catTitles.length} Done</span>
               </div>
-              <span class="ih-cat-row__count">${cnt}</span>
+              <div style="font-size:14px; font-weight:800; color:var(--text-primary); margin-top:2px;">${cat.name}</div>
+              <div style="font-size:10px; color:${cat.clr}; font-weight:700; margin-top:4px;">${subText}</div>
             </div>
           `;
         }).join('')}
+        
+        <!-- Summary All Card -->
+        <div class="ih-stat" style="--clr:#10B981; cursor:pointer; padding:12px; grid-column: 1 / -1; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg, rgba(16,185,129,0.12), rgba(34,229,208,0.05)); border:1px solid rgba(16,185,129,0.3);" onclick="window._insightsExpandCategory('all')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:22px;">🌌</span>
+            <div>
+              <div style="font-size:14px; font-weight:800; color:#10B981;">All Categories Summary</div>
+              <div style="font-size:11px; color:var(--text-muted);">${titles.length} Titles · ${completed.length} Completed (${compRate}% Rate)</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:16px; font-weight:800; color:var(--text-primary);">${watchHours.toFixed(0)}h</div>
+            <div style="font-size:10px; color:var(--text-muted);">${chaptersRead} ch · ${titles.filter(t=>t.category!=='manhwa').reduce((s,t)=>s+(t.progress||0),0)} ep</div>
+          </div>
+        </div>
       </div>
+      <div id="ihCategoryDetails" style="margin-bottom:16px;"></div>
 
       <!-- Top Genres -->
       ${topGenres.length > 0 ? `
