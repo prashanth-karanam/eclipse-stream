@@ -492,6 +492,9 @@ function updateHeroZone() {
       return;
     }
 
+    const isReading = current.category === 'manhwa';
+    const isMovie = current.category === 'movies';
+
     $('#heroEmpty').classList.add('hidden');
     $('#heroPopulated').classList.remove('hidden');
 
@@ -776,6 +779,10 @@ function updateHeroStats(cat) {
 
   const completedEl = $('#statCompleted');
   if (completedEl) completedEl.textContent = completed.length.toString();
+
+  const streakVal = parseInt(localStorage.getItem('cinepulse_streak')) || (titles.length > 0 ? 1 : 0);
+  const streakEl = $('#statStreak');
+  if (streakEl) streakEl.textContent = streakVal > 0 ? `${streakVal} day${streakVal > 1 ? 's' : ''}` : '0 days';
 }
 
 // ============================================================
