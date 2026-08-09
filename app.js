@@ -2191,6 +2191,9 @@ function init() {
     tab.addEventListener('click', () => switchInsightsTab(tab.dataset.tab));
   });
 
+  // Community Modal & Registered User Profile Viewer
+  initCommunityAndProfileViewer();
+
   // Profile Drawer
   const avatarWrapper = $('#avatarWrapper');
   if (avatarWrapper) avatarWrapper.addEventListener('click', openProfile);
@@ -3740,6 +3743,192 @@ function closePlayer() {
   playerModal.style.display = 'none';
   $('#videoIframe').src = '';
   document.body.style.overflow = '';
+}
+
+// ============================================================
+// COMMUNITY MODAL & REGISTERED USER PROFILE VIEWER
+// ============================================================
+function initCommunityAndProfileViewer() {
+  const commBtn = $('#communityBtn');
+  const commModal = $('#communityModal');
+  const commClose = $('#communityModalClose');
+  const commSearchInput = $('#commSearchInput');
+  const commRosterContainer = $('#commRosterContainer');
+
+  const userProfileModal = $('#userProfileViewModal');
+  const userProfileClose = $('#userProfileViewClose');
+  const userProfileContent = $('#userProfileViewContent');
+
+  if (commBtn) {
+    commBtn.addEventListener('click', () => {
+      if (commModal) {
+        commModal.style.display = 'flex';
+        commModal.classList.remove('hidden');
+        renderCommunityRosterModal();
+      }
+    });
+  }
+
+  if (commClose) {
+    commClose.addEventListener('click', () => {
+      if (commModal) {
+        commModal.style.display = 'none';
+        commModal.classList.add('hidden');
+      }
+    });
+  }
+
+  if (userProfileClose) {
+    userProfileClose.addEventListener('click', () => {
+      if (userProfileModal) {
+        userProfileModal.style.display = 'none';
+        userProfileModal.classList.add('hidden');
+      }
+    });
+  }
+
+  if (commSearchInput) {
+    commSearchInput.addEventListener('input', (e) => {
+      renderCommunityRosterModal(e.target.value.trim().toLowerCase());
+    });
+  }
+
+  async function renderCommunityRosterModal(filterQuery = '') {
+    if (!commRosterContainer) return;
+    commRosterContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">Loading community members...</div>`;
+
+    try {
+      const snapshot = await getDocs(collection(db, 'users'));
+      if (snapshot.empty) {
+        commRosterContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">No registered members found.</div>`;
+        return;
+      }
+
+      let members = [];
+      snapshot.forEach(docSnap => {
+        const uData = docSnap.data();
+        const uid = docSnap.id;
+        const uName = uData.username || uData.email || 'Registered User';
+        if (!filterQuery || uName.toLowerCase().includes(filterQuery) || (uData.email && uData.email.toLowerCase().includes(filterQuery))) {
+          members.push({ uid, uData, uName });
+        }
+      });
+
+      if (members.length === 0) {
+        commRosterContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">No member found matching "${filterQuery}".</div>`;
+        return;
+      }
+
+      let html = `<div style="font-size:11px; font-weight:700; color:var(--cyan); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">Showing ${members.length} Registered Member${members.length > 1 ? 's' : ''}</div>`;
+
+      members.forEach(({ uid, uData, uName }) => {
+        const isSelf = state.user && uid === state.user.uid;
+        html += `
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:12px; margin-bottom:10px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--border-focus)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(uName)}" style="width:42px; height:42px; border-radius:50%; background:var(--bg-surface); border:1px solid var(--border-subtle);">
+              <div>
+                <div style="font-weight:800; color:var(--text-primary); font-size:14px; display:flex; align-items:center; gap:6px;">
+                  ${uName} ${isSelf ? '<span style="color:var(--cyan); font-size:11px; font-weight:600;">(You)</span>' : ''}
+                </div>
+                <div style="font-size:11px; color:var(--text-muted);">${uData.email || 'Registered Member'}</div>
+              </div>
+            </div>
+            <button class="progress-item__action-btn progress-item__action-btn--primary view-user-profile-btn" data-uid="${uid}" style="font-size:12px; padding:6px 14px; font-weight:700;">View Profile &rarr;</button>
+          </div>
+        `;
+      });
+
+      commRosterContainer.innerHTML = html;
+
+      // Attach View Profile Click Listeners
+      commRosterContainer.querySelectorAll('.view-user-profile-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const targetUid = e.currentTarget.dataset.uid;
+          openUserProfileModal(targetUid);
+        });
+      });
+    } catch(e) {
+      console.error('Community modal error:', e);
+      commRosterContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">Error loading community roster.</div>`;
+    }
+  }
+
+  async function openUserProfileModal(uid) {
+    if (!userProfileModal || !userProfileContent) return;
+    userProfileModal.style.display = 'flex';
+    userProfileModal.classList.remove('hidden');
+    userProfileContent.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px; font-size:13px;">Loading user profile...</div>`;
+
+    try {
+      // Fetch user profile doc & watchlist
+      const userDoc = await getDoc(doc(db, 'users', uid));
+      const uData = userDoc.exists() ? userDoc.data() : { username: 'User', email: 'Registered Member' };
+      const uName = uData.username || uData.email || 'Registered User';
+
+      const watchlistSnap = await getDocs(collection(db, 'users', uid, 'watchlist'));
+      const titles = [];
+      watchlistSnap.forEach(d => titles.push(d.data()));
+
+      const completed = titles.filter(t => t.status === 'completed');
+      const watchHours = titles.filter(t => t.category !== 'manhwa').reduce((s, t) => {
+        const h = t.category === 'movies' ? ((t.runtime || 120) / 60) : 0.4;
+        return s + (t.progress || 0) * h;
+      }, 0);
+      const chaptersRead = titles.filter(t => t.category === 'manhwa').reduce((s, t) => s + (t.progress || 0), 0);
+
+      userProfileContent.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; text-align:center; padding-bottom:16px; border-bottom:1px solid var(--border-subtle); margin-bottom:16px;">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(uName)}" style="width:72px; height:72px; border-radius:50%; background:var(--bg-surface); border:2px solid var(--cyan); margin-bottom:10px; box-shadow:0 0 20px rgba(34,229,208,0.2);">
+          <h3 style="font-size:20px; font-weight:800; color:var(--text-primary); margin:0;">${uName}</h3>
+          <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${uData.email || 'Registered Member'}</div>
+          <span style="display:inline-block; margin-top:8px; font-size:10px; font-weight:700; color:var(--cyan); background:rgba(34,229,208,0.12); padding:3px 10px; border-radius:12px;">ACTIVE ECLIPSE MEMBER</span>
+        </div>
+
+        <!-- Quick Stats Grid -->
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-bottom:16px;">
+          <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:10px; padding:10px 6px; text-align:center;">
+            <div style="font-size:16px; font-weight:800; color:var(--text-primary);">${titles.length}</div>
+            <div style="font-size:10px; color:var(--text-muted); font-weight:600;">Total</div>
+          </div>
+          <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:10px; padding:10px 6px; text-align:center;">
+            <div style="font-size:16px; font-weight:800; color:#10B981;">${completed.length}</div>
+            <div style="font-size:10px; color:var(--text-muted); font-weight:600;">Done</div>
+          </div>
+          <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:10px; padding:10px 6px; text-align:center;">
+            <div style="font-size:16px; font-weight:800; color:#FF4B4B;">${watchHours.toFixed(0)}h</div>
+            <div style="font-size:10px; color:var(--text-muted); font-weight:600;">Watched</div>
+          </div>
+          <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:10px; padding:10px 6px; text-align:center;">
+            <div style="font-size:16px; font-weight:800; color:#9B5CFF;">${chaptersRead}</div>
+            <div style="font-size:10px; color:var(--text-muted); font-weight:600;">Chapters</div>
+          </div>
+        </div>
+
+        <!-- Title Library Preview -->
+        <div style="font-size:12px; font-weight:700; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Public Watchlist (${titles.length} Titles)</div>
+        ${titles.length === 0 ? '<div style="color:var(--text-muted); font-size:12px; text-align:center; padding:20px 0;">No titles added to library yet.</div>' : `
+          <div style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; padding-right:4px;">
+            ${titles.map(t => `
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 10px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:8px;">
+                <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+                  <img src="${t.poster || t.image || 'https://via.placeholder.com/40x55'}" style="width:32px; height:44px; object-fit:cover; border-radius:4px; flex-shrink:0;">
+                  <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                    <div style="font-size:13px; font-weight:700; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${t.title}</div>
+                    <div style="font-size:10px; color:var(--text-muted); text-transform:capitalize;">${t.category || 'Title'} · ${t.progress || 0} ${t.category === 'manhwa' ? 'ch' : 'ep'}</div>
+                  </div>
+                </div>
+                <span class="status-badge status-badge--${t.status === 'completed' ? 'completed' : 'watching'}" style="font-size:10px; flex-shrink:0;">${t.status || 'Library'}</span>
+              </div>
+            `).join('')}
+          </div>
+        `}
+      `;
+    } catch(e) {
+      console.error('Error opening user profile:', e);
+      userProfileContent.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:30px; font-size:13px;">Error loading user profile.</div>`;
+    }
+  }
 }
 
 
