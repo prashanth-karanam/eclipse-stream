@@ -132,7 +132,7 @@ function getPoster(item) {
 
 const state = {
   activeCategory: 'all',
-  hasData: true, // toggle to false to see empty states
+  hasData: false, // Default to false until valid user titles are present
   searchQuery: '',
   matrixSearchQuery: '',
   matrixFilter: 'trending',
@@ -448,48 +448,52 @@ const STRIP_SUBTITLES = {
 function updateHeroZone() {
   try {
     const cat = state.activeCategory;
-  const titles = getTitlesForCategory(cat);
-  const planningTitles = titles.filter(t => t.status === 'planning');
-  const inProgressTitles = titles.filter(t => t.status === 'in-progress');
-
-  // Ensure we have a valid tab state based on available data
-  if (state.heroStatusTab === 'in-progress' && inProgressTitles.length === 0 && planningTitles.length > 0) {
-    state.heroStatusTab = 'planning';
-  } else if (state.heroStatusTab === 'planning' && planningTitles.length === 0 && inProgressTitles.length > 0) {
-    state.heroStatusTab = 'in-progress';
-  }
-  
-  // Display list depends on the active tab
-  const displayTitles = state.heroStatusTab === 'in-progress' ? inProgressTitles : planningTitles;
-
-  if (state.justCompleted) {
-    // Force empty state after completion for 1 cycle
-    state.justCompleted = false;
-  }
-
-  if (!state.hasData || titles.length === 0 || displayTitles.length === 0) {
-    $('#heroPopulated').classList.add('hidden');
-    $('#heroEmpty').classList.remove('hidden');
-    const copy = EMPTY_STATE_COPY[cat] || EMPTY_STATE_COPY.all;
-    $('#emptyHeadline').textContent = copy.headline;
-    $('#emptySubtext').textContent = copy.sub;
+    const titles = getTitlesForCategory(cat);
     
-    // Also clear mini tabs if empty
-    const miniTabsEl = $('#heroMiniTabs');
-    if (miniTabsEl) {
-      miniTabsEl.style.display = 'none';
-      miniTabsEl.innerHTML = '';
+    // Strict sanitation: only titles with non-empty title string
+    const validTitles = titles.filter(t => t && typeof t.title === 'string' && t.title.trim() !== '');
+    const planningTitles = validTitles.filter(t => t.status === 'planning');
+    const inProgressTitles = validTitles.filter(t => t.status === 'in-progress');
+
+    // Ensure we have a valid tab state based on available data
+    if (state.heroStatusTab === 'in-progress' && inProgressTitles.length === 0 && planningTitles.length > 0) {
+      state.heroStatusTab = 'planning';
+    } else if (state.heroStatusTab === 'planning' && planningTitles.length === 0 && inProgressTitles.length > 0) {
+      state.heroStatusTab = 'in-progress';
     }
-    return;
-  }
+    
+    // Display list depends on the active tab
+    const displayTitles = state.heroStatusTab === 'in-progress' ? inProgressTitles : planningTitles;
 
-  // Pick the title to highlight (first of the active tab)
-  const current = displayTitles[0];
-  const isReading = current.category === 'manhwa';
-  const isMovie = current.category === 'movies';
+    if (state.justCompleted) {
+      state.justCompleted = false;
+    }
 
-  $('#heroEmpty').classList.add('hidden');
-  $('#heroPopulated').classList.remove('hidden');
+    if (validTitles.length === 0 || displayTitles.length === 0) {
+      $('#heroPopulated').classList.add('hidden');
+      $('#heroEmpty').classList.remove('hidden');
+      const copy = EMPTY_STATE_COPY[cat] || EMPTY_STATE_COPY.all;
+      if ($('#emptyHeadline')) $('#emptyHeadline').textContent = copy.headline;
+      if ($('#emptySubtext')) $('#emptySubtext').textContent = copy.sub;
+      
+      const miniTabsEl = $('#heroMiniTabs');
+      if (miniTabsEl) {
+        miniTabsEl.style.display = 'none';
+        miniTabsEl.innerHTML = '';
+      }
+      return;
+    }
+
+    // Pick the title to highlight (first of the active tab)
+    const current = displayTitles[0];
+    if (!current || !current.title || current.title.trim() === '') {
+      $('#heroPopulated').classList.add('hidden');
+      $('#heroEmpty').classList.remove('hidden');
+      return;
+    }
+
+    $('#heroEmpty').classList.add('hidden');
+    $('#heroPopulated').classList.remove('hidden');
 
   // --- Status label ---
   if (current.status === 'planning') {
