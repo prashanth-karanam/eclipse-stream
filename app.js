@@ -1570,6 +1570,7 @@ const ORACLE_MASTER_POOL = [
 ];
 
 let oracleFilterCategory = 'all';
+let oracleCurrentOffset = 0;
 
 function renderOracleTab() {
   const titles = state.titles || [];
