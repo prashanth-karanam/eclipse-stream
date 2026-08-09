@@ -1565,7 +1565,7 @@ const ORACLE_MASTER_POOL = [
   { title: 'Eleceed', category: 'manhwa', genre: 'Action · Comedy', rating: '9.7', match: '99%', desc: 'A cat-bodied secret agent trains a high schooler with secret lightning powers.', poster: 'https://cdn.myanimelist.net/images/manga/3/229047.jpg' }
 ];
 
-let oracleCurrentOffset = 0;
+let oracleFilterCategory = 'all';
 
 function renderOracleTab() {
   const titles = state.titles || [];
@@ -1581,43 +1581,66 @@ function renderOracleTab() {
     return Object.keys(genres).sort((a,b) => genres[b] - genres[a])[0] || 'Action';
   })();
 
-  // Rotate through the pool of 15 titles 5 at a time
-  const startIdx = (oracleCurrentOffset * 5) % ORACLE_MASTER_POOL.length;
-  const oraclePicks = ORACLE_MASTER_POOL.slice(startIdx, startIdx + 5);
+  // Filter master pool based on active pill filter
+  let filteredPool = ORACLE_MASTER_POOL;
+  if (oracleFilterCategory === 'manhwa') {
+    filteredPool = ORACLE_MASTER_POOL.filter(p => p.category === 'manhwa');
+  } else if (oracleFilterCategory === 'anime') {
+    filteredPool = ORACLE_MASTER_POOL.filter(p => p.category === 'anime');
+  } else if (oracleFilterCategory === 'series') {
+    filteredPool = ORACLE_MASTER_POOL.filter(p => p.category === 'series');
+  }
 
-  const cardsHtml = oraclePicks.map(p => `
-    <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 14px; display: flex; gap: 14px; margin-bottom: 12px; align-items: center; transition: border-color 0.2s;" onmouseover="this.style.borderColor='var(--cyan)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
-      <img src="${p.poster}" style="width: 60px; height: 86px; object-fit: cover; border-radius: 8px; flex-shrink: 0;" onerror="this.src='https://placehold.co/60x86/1a1a2e/ffffff?text=Eclipse'">
-      <div style="flex: 1; min-width: 0;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
-          <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${p.title}</h4>
-          <span style="font-size: 11px; color: #10B981; font-weight: 800; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:10px;">★ ${p.rating} · ${p.match}</span>
+  // Rotate through pool
+  const startIdx = (oracleCurrentOffset * 4) % Math.max(1, filteredPool.length);
+  const oraclePicks = filteredPool.slice(startIdx, startIdx + 4);
+  const displayPicks = oraclePicks.length > 0 ? oraclePicks : filteredPool.slice(0, 4);
+
+  const cardsHtml = displayPicks.map(p => {
+    const matchScore = p.genre.includes(topGenre) ? '99%' : (p.category === topCategory ? '96%' : `${90 + (p.title.length % 7)}%`);
+    return `
+      <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 14px; display: flex; gap: 14px; margin-bottom: 12px; align-items: center; transition: border-color 0.2s;" onmouseover="this.style.borderColor='var(--cyan)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
+        <img src="${p.poster}" style="width: 60px; height: 86px; object-fit: cover; border-radius: 8px; flex-shrink: 0;" onerror="this.src='https://placehold.co/60x86/1a1a2e/ffffff?text=Eclipse'">
+        <div style="flex: 1; min-width: 0;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
+            <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${p.title}</h4>
+            <span style="font-size: 11px; color: #10B981; font-weight: 800; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:10px;">★ ${p.rating} · ${matchScore} Match</span>
+          </div>
+          <div style="font-size: 11px; color: var(--cyan); font-weight: 600; margin-bottom: 4px;">${p.category.toUpperCase()} · ${p.genre}</div>
+          <p style="font-size: 11px; color: var(--text-secondary); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">${p.desc}</p>
         </div>
-        <div style="font-size: 11px; color: var(--cyan); font-weight: 600; margin-bottom: 4px;">${p.genre}</div>
-        <p style="font-size: 11px; color: var(--text-secondary); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">${p.desc}</p>
+        <button class="btn-primary oracle-quick-add" data-title="${p.title}" data-category="${p.category}" data-genre="${p.genre}" data-poster="${p.poster}" style="padding: 8px 14px; font-size: 12px; font-weight: 700; flex-shrink: 0;">
+          + Add
+        </button>
       </div>
-      <button class="btn-primary oracle-quick-add" data-title="${p.title}" data-category="${p.category}" data-genre="${p.genre}" data-poster="${p.poster}" style="padding: 8px 14px; font-size: 12px; font-weight: 700; flex-shrink: 0;">
-        + Add
-      </button>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   return `
     <div class="ih-oracle-tab" style="padding: 6px 0;">
-      <div style="background: linear-gradient(135deg, rgba(155,92,255,0.2), rgba(34,229,208,0.12)); border: 1px solid rgba(155,92,255,0.4); border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 8px 24px rgba(155,92,255,0.15);">
+      <!-- Hero AI Banner -->
+      <div style="background: linear-gradient(135deg, rgba(155,92,255,0.2), rgba(34,229,208,0.12)); border: 1px solid rgba(155,92,255,0.4); border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 16px; position: relative; overflow: hidden; box-shadow: 0 8px 24px rgba(155,92,255,0.15);">
         <div style="display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; background: linear-gradient(135deg, #9B5CFF, #22E5D0); border-radius: 50%; margin-bottom: 10px; box-shadow: 0 0 24px rgba(155,92,255,0.5);">
           <span style="font-size: 26px;">🔮</span>
         </div>
         <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800; color: #fff;">Oracle AI Recommendation Engine</h3>
         <p style="margin: 0 0 14px 0; font-size: 12px; color: var(--text-secondary);">Synthesized for your affinity: <strong style="color: var(--cyan);">${topGenre}</strong> & <strong style="color: var(--violet);">${topCategory.toUpperCase()}</strong></p>
-        <button id="oracleReSynthesizeBtn" class="btn-primary" style="font-weight:800; font-size:12px; padding:8px 18px; border-radius:20px; background:linear-gradient(135deg, var(--violet), var(--cyan)); border:none;">
+        <button id="oracleReSynthesizeBtn" class="btn-primary" style="font-weight:800; font-size:12px; padding:8px 18px; border-radius:20px; background:linear-gradient(135deg, var(--violet), var(--cyan)); border:none; cursor:pointer;">
           🔮 Consult Oracle Ritual (Fresh Batch)
         </button>
       </div>
 
+      <!-- Filter Pills -->
+      <div style="display:flex; gap:8px; margin-bottom:14px; overflow-x:auto; padding-bottom:4px;">
+        <button class="oracle-cat-pill ${oracleFilterCategory === 'all' ? 'active' : ''}" data-cat="all" style="background:${oracleFilterCategory === 'all' ? 'var(--cyan)' : 'rgba(255,255,255,0.06)'}; color:${oracleFilterCategory === 'all' ? '#000' : 'var(--text-muted)'}; font-weight:700; font-size:12px; padding:6px 14px; border-radius:12px; border:none; cursor:pointer;">✨ All Affinity</button>
+        <button class="oracle-cat-pill ${oracleFilterCategory === 'manhwa' ? 'active' : ''}" data-cat="manhwa" style="background:${oracleFilterCategory === 'manhwa' ? '#9B5CFF' : 'rgba(255,255,255,0.06)'}; color:${oracleFilterCategory === 'manhwa' ? '#fff' : 'var(--text-muted)'}; font-weight:700; font-size:12px; padding:6px 14px; border-radius:12px; border:none; cursor:pointer;">📜 Manhwa & Manga</button>
+        <button class="oracle-cat-pill ${oracleFilterCategory === 'anime' ? 'active' : ''}" data-cat="anime" style="background:${oracleFilterCategory === 'anime' ? '#FF4B4B' : 'rgba(255,255,255,0.06)'}; color:${oracleFilterCategory === 'anime' ? '#fff' : 'var(--text-muted)'}; font-weight:700; font-size:12px; padding:6px 14px; border-radius:12px; border:none; cursor:pointer;">🎌 Anime</button>
+        <button class="oracle-cat-pill ${oracleFilterCategory === 'series' ? 'active' : ''}" data-cat="series" style="background:${oracleFilterCategory === 'series' ? '#F59E0B' : 'rgba(255,255,255,0.06)'}; color:${oracleFilterCategory === 'series' ? '#000' : 'var(--text-muted)'}; font-weight:700; font-size:12px; padding:6px 14px; border-radius:12px; border:none; cursor:pointer;">🎬 Series & Movies</button>
+      </div>
+
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
-        <span style="font-size: 14px; font-weight: 800; color: var(--text-primary);">Top Affinity Curations</span>
-        <span style="font-size: 11px; color: var(--cyan); font-weight: 700;">5 Fresh Matches Ready</span>
+        <span style="font-size: 14px; font-weight: 800; color: var(--text-primary);">${oracleFilterCategory.toUpperCase()} Curations</span>
+        <span style="font-size: 11px; color: var(--cyan); font-weight: 700;">${displayPicks.length} Live Matches Ready</span>
       </div>
       <div id="oracleRecommendationsList">
         ${cardsHtml}
@@ -1630,6 +1653,14 @@ function attachInsightsListeners() {
   // Bind both .insights-tab (HTML panel) and .insights-tab-btn (legacy)
   document.querySelectorAll('.insights-tab, .insights-tab-btn').forEach(btn => {
     btn.onclick = () => switchInsightsTab(btn.dataset.tab);
+  });
+
+  // Oracle Filter Pills
+  document.querySelectorAll('.oracle-cat-pill').forEach(pill => {
+    pill.onclick = () => {
+      oracleFilterCategory = pill.dataset.cat;
+      switchInsightsTab('oracle');
+    };
   });
   
   // Oracle quick add
@@ -1679,7 +1710,7 @@ function attachInsightsListeners() {
       oracleBtn.disabled = true;
       oracleCurrentOffset++;
       setTimeout(() => {
-        showUndoToast('🔮 Oracle AI Ritual Complete: 5 Fresh Curations Synthesized!');
+        showUndoToast('🔮 Oracle AI Ritual Complete: Fresh Curations Synthesized!');
         switchInsightsTab('oracle');
       }, 300);
     };
