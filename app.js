@@ -1180,6 +1180,7 @@ function renderOverviewTab() {
   const watching = titles.filter(t => t.status === 'in-progress');
   const completed = titles.filter(t => t.status === 'completed');
   const planning = titles.filter(t => t.status === 'planning');
+  const compRate = titles.length > 0 ? Math.round((completed.length / titles.length) * 100) : 0;
 
   // Watch time calc
   const watchHours = titles.filter(t => t.category !== 'manhwa').reduce((s, t) => {
