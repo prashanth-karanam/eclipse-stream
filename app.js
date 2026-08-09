@@ -1466,38 +1466,79 @@ function renderAchievementsTab() {
   const totalCh = titles.filter(t => t.category === 'manhwa').reduce((s,t) => s + (t.progress||0), 0);
 
   const ACHIEVEMENTS_DEF = [
-    { id:'first_add', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`, label:'First Steps', desc:'Add your first title', clr:'#F59E0B', condition: () => titles.length >= 1 },
-    { id:'first_done', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`, label:'Finisher', desc:'Complete your first title', clr:'#10B981', condition: () => completed.length >= 1 },
-    { id:'binge_5', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22E5D0" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>`, label:'Binge Mode', desc:'Add 5 or more titles', clr:'#22E5D0', condition: () => titles.length >= 5 },
-    { id:'complete_10', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF4B4B" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>`, label:'Champion', desc:'Complete 10 titles', clr:'#FF4B4B', condition: () => completed.length >= 10 },
-    { id:'ep_100', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B5CFF" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 4v16M18 4v16M2 8h20M2 16h20"/></svg>`, label:'100 Club', desc:'Watch 100+ episodes', clr:'#9B5CFF', condition: () => totalEps >= 100 },
-    { id:'ep_1000', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`, label:'Episode God', desc:'Watch 1000+ episodes', clr:'#FF6B35', condition: () => totalEps >= 1000 },
-    { id:'ch_100', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C084FC" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`, label:'Page Turner', desc:'Read 100+ chapters', clr:'#C084FC', condition: () => totalCh >= 100 },
-    { id:'all_cats', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06D6A0" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>`, label:'All-Rounder', desc:'Explore all 4 categories', clr:'#06D6A0', condition: () => categories.size >= 4 },
-    { id:'streak7', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF4B4B" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3.5z"/></svg>`, label:'Week Warrior', desc:'7-day activity streak', clr:'#FF4B4B', condition: () => streak >= 7 },
-    { id:'streak30', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`, label:'Monthly Devotion', desc:'30-day streak', clr:'#F59E0B', condition: () => streak >= 30 },
-    { id:'night_owl', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`, label:'Night Owl', desc:'Watched something after midnight', clr:'#4F46E5', condition: () => false },
-    { id:'completionist', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`, label:'Perfectionist', desc:'100% complete all added titles', clr:'#10B981', condition: () => titles.length > 0 && titles.every(t => t.status === 'completed') },
+    { id:'first_add', rarity:'Bronze', xp:100, icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`, label:'First Steps', desc:'Add your first title', clr:'#F59E0B', curr: titles.length, target: 1, unit: 'titles', condition: () => titles.length >= 1 },
+    { id:'first_done', rarity:'Bronze', xp:100, icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`, label:'Finisher', desc:'Complete your first title', clr:'#10B981', curr: completed.length, target: 1, unit: 'completed', condition: () => completed.length >= 1 },
+    { id:'binge_5', rarity:'Bronze', xp:150, icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22E5D0" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>`, label:'Binge Mode', desc:'Add 5 or more titles', clr:'#22E5D0', curr: titles.length, target: 5, unit: 'titles', condition: () => titles.length >= 5 },
+    { id:'complete_10', rarity:'Gold', xp:500, icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF4B4B" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>`, label:'Champion', desc:'Complete 10 titles', clr:'#FF4B4B', curr: completed.length, target: 10, unit: 'completed', condition: () => completed.length >= 10 },
+    { id:'ep_100', rarity:'Silver', xp:250, icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B5CFF" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 4v16M18 4v16M2 8h20M2 16h20"/></svg>`, label:'100 Club', desc:'Watch 100+ episodes', clr:'#9B5CFF', curr: totalEps, target: 100, unit: 'eps', condition: () => totalEps >= 100 },
+    { id:'ep_1000', rarity:'Platinum', xp:1000, icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`, label:'Episode God', desc:'Watch 1000+ episodes', clr:'#FF6B35', curr: totalEps, target: 1000, unit: 'eps', condition: () => totalEps >= 1000 },
+    { id:'ch_100', rarity:'Silver', xp:250, icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C084FC" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`, label:'Page Turner', desc:'Read 100+ chapters', clr:'#C084FC', curr: totalCh, target: 100, unit: 'ch', condition: () => totalCh >= 100 },
+    { id:'all_cats', rarity:'Silver', xp:250, icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06D6A0" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>`, label:'All-Rounder', desc:'Explore all 4 categories', clr:'#06D6A0', curr: categories.size, target: 4, unit: 'cats', condition: () => categories.size >= 4 },
+    { id:'streak7', rarity:'Gold', xp:500, icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF4B4B" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3.5z"/></svg>`, label:'Week Warrior', desc:'7-day activity streak', clr:'#FF4B4B', curr: streak, target: 7, unit: 'days', condition: () => streak >= 7 },
+    { id:'streak30', rarity:'Platinum', xp:1000, icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`, label:'Monthly Devotion', desc:'30-day streak', clr:'#F59E0B', curr: streak, target: 30, unit: 'days', condition: () => streak >= 30 },
+    { id:'completionist', rarity:'Gold', xp:500, icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`, label:'Perfectionist', desc:'100% complete all added titles', clr:'#10B981', curr: completed.length, target: Math.max(1, titles.length), unit: 'all', condition: () => titles.length > 0 && titles.every(t => t.status === 'completed') }
   ];
 
   const unlocked = ACHIEVEMENTS_DEF.filter(a => a.condition());
+  const totalXP = unlocked.reduce((sum, a) => sum + a.xp, 0);
+  const userLevel = Math.floor(totalXP / 250) + 1;
+  const levelXP = totalXP % 250;
+  const levelPct = Math.min(100, Math.round((levelXP / 250) * 100));
+
+  const LEVEL_TITLES = ['Novice Binger', 'Seasoned Watcher', 'Cinephile Veteran', 'Eclipse Legend', 'Cosmic Monarch'];
+  const rankTitle = LEVEL_TITLES[Math.min(userLevel - 1, LEVEL_TITLES.length - 1)];
 
   return `
-    <div class="ih-achievements">
-      <div class="ih-section-title" style="display:flex;align-items:center;gap:8px">
-        <span>Unlocked</span>
-        <span class="ih-badge">${unlocked.length}/${ACHIEVEMENTS_DEF.length}</span>
+    <div class="ih-achievements" style="padding: 6px 0;">
+      <!-- Upgraded Level & XP Banner -->
+      <div style="background: linear-gradient(135deg, rgba(34,229,208,0.12), rgba(155,92,255,0.15)); border: 1px solid rgba(34,229,208,0.3); border-radius: 16px; padding: 18px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg, var(--cyan), var(--violet)); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:18px; color:#000; box-shadow:0 0 16px rgba(34,229,208,0.4);">
+              ${userLevel}
+            </div>
+            <div>
+              <div style="font-size:16px; font-weight:800; color:var(--text-primary);">${rankTitle}</div>
+              <div style="font-size:12px; color:var(--cyan); font-weight:600;">${totalXP} Total XP Earned</div>
+            </div>
+          </div>
+          <span class="ih-badge" style="background:rgba(34,229,208,0.2); color:var(--cyan); font-weight:700; padding:4px 10px; border-radius:12px; font-size:12px;">
+            ${unlocked.length}/${ACHIEVEMENTS_DEF.length} Trophies
+          </span>
+        </div>
+        
+        <!-- XP Progress Bar -->
+        <div style="background:rgba(0,0,0,0.4); height:8px; border-radius:4px; overflow:hidden; border:1px solid var(--border-subtle);">
+          <div style="background:linear-gradient(90deg, var(--cyan), var(--violet)); height:100%; width:${levelPct}%; transition:width 0.5s var(--ease-smooth);"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-top:4px;">
+          <span>Level ${userLevel} Progress (${levelXP}/250 XP)</span>
+          <span>Next Level: ${250 - levelXP} XP needed</span>
+        </div>
       </div>
-      <div class="ih-ach-grid">
+
+      <!-- Achievement Cards Grid -->
+      <div class="ih-ach-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:12px;">
         ${ACHIEVEMENTS_DEF.map(a => {
           const done = a.condition();
+          const pct = done ? 100 : Math.min(95, Math.round((a.curr / a.target) * 100));
           return `
-            <div class="ih-ach-card ${done ? 'unlocked' : 'locked'}" style="--clr:${a.clr}">
-              <div class="ih-ach-card__glow"></div>
-              <div class="ih-ach-card__icon">${a.icon}</div>
-              <div class="ih-ach-card__label">${a.label}</div>
-              <div class="ih-ach-card__desc">${a.desc}</div>
-              ${done ? '<div class="ih-ach-card__tick">✓</div>' : '<div class="ih-ach-card__lock">🔒</div>'}
+            <div class="ih-ach-card ${done ? 'unlocked' : 'locked'}" style="--clr:${a.clr}; position:relative; background:var(--bg-card); border:1px solid ${done ? 'var(--cyan)' : 'var(--border-subtle)'}; border-radius:14px; padding:14px; transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                <div class="ih-ach-card__icon" style="width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center;">${a.icon}</div>
+                <span style="font-size:10px; font-weight:800; color:${done ? 'var(--cyan)' : 'var(--text-muted)'}; background:rgba(255,255,255,0.06); padding:2px 8px; border-radius:10px;">+${a.xp} XP</span>
+              </div>
+              <div class="ih-ach-card__label" style="font-weight:800; font-size:14px; color:var(--text-primary); margin-bottom:2px;">${a.label}</div>
+              <div class="ih-ach-card__desc" style="font-size:11px; color:var(--text-muted); margin-bottom:10px; min-height:28px;">${a.desc}</div>
+              
+              <!-- Progress Indicator -->
+              <div style="background:rgba(0,0,0,0.3); height:6px; border-radius:3px; overflow:hidden; margin-bottom:6px;">
+                <div style="background:${done ? a.clr : 'var(--text-muted)'}; height:100%; width:${pct}%;"></div>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:700; color:${done ? 'var(--cyan)' : 'var(--text-muted)'};">
+                <span>${done ? 'UNLOCKED ✓' : `${a.curr}/${a.target} ${a.unit}`}</span>
+                <span>${pct}%</span>
+              </div>
             </div>
           `;
         }).join('')}
@@ -1521,40 +1562,47 @@ function renderOracleTab() {
   })();
 
   const oraclePicks = [
-    { title: 'Solo Leveling (Arise)', category: 'anime', genre: 'Action · Fantasy', rating: '8.7', desc: 'In a world where hunters battle deadly monsters, weak hunter Sung Jinwoo gets a second chance.', poster: 'https://cdn.myanimelist.net/images/anime/1521/140924.jpg' },
-    { title: 'Omniscient Reader\'s Viewpoint', category: 'manhwa', genre: 'Action · System', rating: '9.2', desc: 'Kim Dokja is the sole reader of a web novel. Suddenly, the novel becomes real life.', poster: 'https://uploads.mangadex.org/covers/e005080e-3b56-4dc5-b461-750d686f082e/6b010c2c-e11f-49e0-88cb-7e23b2c4e2cf.jpg.256.jpg' },
-    { title: 'The Glory (K-Drama)', category: 'series', genre: 'K-Drama · Revenge', rating: '8.8', desc: 'Years after surviving horrific abuse in high school, a woman puts a elaborate revenge plan in motion.', poster: 'https://image.tmdb.org/t/p/w500/6jO24y0x6Neq4lS6o1n1s54.jpg' },
-    { title: 'KinnPorsche: The Series', category: 'series', genre: 'Thai Drama · BL Action', rating: '8.6', desc: 'Porsche, a young bartender, gets drawn into the dangerous mafia underworld as bodyguard to Kinn.', poster: 'https://image.tmdb.org/t/p/w500/q3U4nZ8o4P2X4J0.jpg' }
+    { title: 'Solo Leveling (Arise)', category: 'anime', genre: 'Action · Fantasy', rating: '8.7', match: '99%', desc: 'In a world where hunters battle deadly monsters, weak hunter Sung Jinwoo gets a second chance.', poster: 'https://cdn.myanimelist.net/images/anime/1521/140924.jpg' },
+    { title: 'Omniscient Reader\'s Viewpoint', category: 'manhwa', genre: 'Action · System', rating: '9.4', match: '98%', desc: 'Kim Dokja is the sole reader of a web novel. Suddenly, the novel becomes real life.', poster: 'https://uploads.mangadex.org/covers/e005080e-3b56-4dc5-b461-750d686f082e/6b010c2c-e11f-49e0-88cb-7e23b2c4e2cf.jpg.256.jpg' },
+    { title: 'Chainsaw Man', category: 'anime', genre: 'Action · Supernatural', rating: '8.8', match: '95%', desc: 'Denji makes a contract with the Chainsaw Devil and becomes a devil hunter for the Public Safety Bureau.', poster: 'https://cdn.myanimelist.net/images/anime/1806/126216.jpg' },
+    { title: 'The Glory (K-Drama)', category: 'series', genre: 'K-Drama · Revenge', rating: '8.8', match: '93%', desc: 'Years after surviving horrific abuse in high school, a woman puts an elaborate revenge plan in motion.', poster: 'https://image.tmdb.org/t/p/w500/6jO24y0x6Neq4lS6o1n1s54.jpg' },
+    { title: 'Cyberpunk: Edgerunners', category: 'anime', genre: 'Sci-Fi · Cyberpunk', rating: '8.6', match: '92%', desc: 'A street kid trying to survive in a technology-obsessed city becomes an edgerunner mercenary.', poster: 'https://cdn.myanimelist.net/images/anime/1818/126436.jpg' }
   ];
 
   const cardsHtml = oraclePicks.map(p => `
-    <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; display: flex; gap: 14px; margin-bottom: 12px; align-items: center;">
-      <img src="${p.poster}" style="width: 56px; height: 80px; object-fit: cover; border-radius: 8px; flex-shrink: 0;" onerror="this.src='https://placehold.co/56x80/1a1a2e/ffffff?text=Eclipse'">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 14px; display: flex; gap: 14px; margin-bottom: 12px; align-items: center; transition: border-color 0.2s;" onmouseover="this.style.borderColor='var(--cyan)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
+      <img src="${p.poster}" style="width: 60px; height: 86px; object-fit: cover; border-radius: 8px; flex-shrink: 0;" onerror="this.src='https://placehold.co/60x86/1a1a2e/ffffff?text=Eclipse'">
       <div style="flex: 1; min-width: 0;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
-          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${p.title}</h4>
-          <span style="font-size: 11px; color: var(--cyan); font-weight: 700;">★ ${p.rating}</span>
+          <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${p.title}</h4>
+          <span style="font-size: 11px; color: #10B981; font-weight: 800; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:10px;">★ ${p.rating} · ${p.match}</span>
         </div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">${p.genre}</div>
+        <div style="font-size: 11px; color: var(--cyan); font-weight: 600; margin-bottom: 4px;">${p.genre}</div>
         <p style="font-size: 11px; color: var(--text-secondary); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">${p.desc}</p>
       </div>
-      <button class="btn-primary oracle-quick-add" data-title="${p.title}" data-category="${p.category}" data-genre="${p.genre}" data-poster="${p.poster}" style="padding: 6px 12px; font-size: 11px; flex-shrink: 0;">
+      <button class="btn-primary oracle-quick-add" data-title="${p.title}" data-category="${p.category}" data-genre="${p.genre}" data-poster="${p.poster}" style="padding: 8px 14px; font-size: 12px; font-weight: 700; flex-shrink: 0;">
         + Add
       </button>
     </div>
   `).join('');
 
   return `
-    <div class="ih-oracle-tab" style="padding: 10px 0;">
-      <div style="background: linear-gradient(135deg, rgba(155,92,255,0.15), rgba(34,229,208,0.08)); border: 1px solid rgba(155,92,255,0.3); border-radius: 16px; padding: 18px; text-align: center; margin-bottom: 20px; position: relative; overflow: hidden;">
-        <div style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: linear-gradient(135deg, #9B5CFF, #22E5D0); border-radius: 50%; margin-bottom: 10px; box-shadow: 0 0 20px rgba(155,92,255,0.4);">
-          <span style="font-size: 22px;">🔮</span>
+    <div class="ih-oracle-tab" style="padding: 6px 0;">
+      <div style="background: linear-gradient(135deg, rgba(155,92,255,0.2), rgba(34,229,208,0.12)); border: 1px solid rgba(155,92,255,0.4); border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 8px 24px rgba(155,92,255,0.15);">
+        <div style="display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; background: linear-gradient(135deg, #9B5CFF, #22E5D0); border-radius: 50%; margin-bottom: 10px; box-shadow: 0 0 24px rgba(155,92,255,0.5);">
+          <span style="font-size: 26px;">🔮</span>
         </div>
-        <h3 style="margin: 0 0 4px 0; font-size: 17px; font-weight: 700; color: #fff;">Oracle AI Recommendations</h3>
-        <p style="margin: 0; font-size: 12px; color: var(--text-secondary);">Synthesized for your affinity: <strong style="color: var(--cyan);">${topGenre}</strong> & <strong style="color: var(--violet);">${topCategory.toUpperCase()}</strong></p>
+        <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800; color: #fff;">Oracle AI Recommendation Engine</h3>
+        <p style="margin: 0 0 14px 0; font-size: 12px; color: var(--text-secondary);">Synthesized for your affinity: <strong style="color: var(--cyan);">${topGenre}</strong> & <strong style="color: var(--violet);">${topCategory.toUpperCase()}</strong></p>
+        <button id="oracleReSynthesizeBtn" class="btn-primary" style="font-weight:800; font-size:12px; padding:8px 18px; border-radius:20px; background:linear-gradient(135deg, var(--violet), var(--cyan)); border:none;">
+          🔮 Consult Oracle Ritual
+        </button>
       </div>
 
-      <div style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;">Top Oracle Curations</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+        <span style="font-size: 14px; font-weight: 800; color: var(--text-primary);">Top Affinity Curations</span>
+        <span style="font-size: 11px; color: var(--cyan); font-weight: 700;">5 Matches Ready</span>
+      </div>
       <div id="oracleRecommendationsList">
         ${cardsHtml}
       </div>
@@ -1606,6 +1654,19 @@ function attachInsightsListeners() {
       updateStrip();
     };
   });
+
+  // Oracle Re-Synthesize Ritual
+  const oracleBtn = $('#oracleReSynthesizeBtn');
+  if (oracleBtn) {
+    oracleBtn.onclick = () => {
+      oracleBtn.innerHTML = '✨ Resynthesizing Crystal Grid...';
+      oracleBtn.disabled = true;
+      setTimeout(() => {
+        showUndoToast('🔮 Oracle AI Ritual Complete: 5 Fresh Curations Synthesized!');
+        switchInsightsTab('oracle');
+      }, 400);
+    };
+  }
 }
 
 // ============================================================
