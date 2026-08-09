@@ -2154,43 +2154,46 @@ async function loadSectionPage(sectionId, page) {
     let items = [];
 
     if (sectionId === 'anime') {
-        const jikanPage = ((page - 1) % 5) + 1;
-        items = await getTopJikan('anime', jikanPage);
-        items = (items || []).map(i => ({ ...i, category: 'anime' }));
-      } else if (sectionId === 'movies') {
-        const tmdbPage = ((page - 1) % 3) + 1;
-        const tmdbMovies = await getTrendingTMDB('movie', 'week', tmdbPage);
-        items = (tmdbMovies || []).map(i => ({ ...i, category: 'movies' }));
-        if (items.length === 0) {
-          const tvm = await fetchTVMazeSeries(Math.max(0, page - 1));
-          items = tvm.slice(0, 20).map(s => ({ ...s, category: 'movies' }));
-        }
-      } else if (sectionId === 'series') {
-        const tmdbPage = ((page - 1) % 3) + 1;
-        const tmdbSeries = await getTrendingTMDB('tv', 'week', tmdbPage);
-        items = (tmdbSeries || []).map(i => ({ ...i, category: 'series' }));
-        if (items.length === 0) {
-          const tvm = await fetchTVMazeSeries(Math.max(0, page - 1));
-          items = tvm.filter(s => s.category === 'series').slice(0, 20);
-          if (items.length === 0) items = tvm.slice(0, 20).map(s => ({ ...s, category: 'series' }));
-        }
-      } else if (sectionId === 'manhwa') {
-        const jikanPage = ((page - 1) % 5) + 1;
-        items = await fetchTopManhwa(jikanPage);
-        items = (items || []).map(i => ({ ...i, category: 'manhwa' }));
-      } else if (sectionId === 'kdrama') {
-        items = await discoverTMDB('tv', { with_original_language: 'ko', with_genres: '18', sort_by: 'popularity.desc', page });
-        items = (items || []).map(i => ({ ...i, category: 'kdrama' }));
-      } else if (sectionId === 'thai') {
-        items = await discoverTMDB('tv', { with_original_language: 'th', with_genres: '18', sort_by: 'popularity.desc', page });
-        items = (items || []).map(i => ({ ...i, category: 'thai' }));
-      } else if (sectionId === 'bl') {
-        items = await discoverTMDB('tv', { with_keywords: '210024', sort_by: 'popularity.desc', page });
-        items = (items || []).map(i => ({ ...i, category: 'bl' }));
-      } else if (sectionId === 'gl') {
-        items = await searchTMDB('girls love ' + page, 'tv');
-        items = (items || []).map(i => ({ ...i, category: 'gl' }));
+      const jikanPage = ((page - 1) % 5) + 1;
+      items = await getTopJikan('anime', jikanPage);
+      items = (items || []).map(i => ({ ...i, category: 'anime' }));
+      if (items.length === 0) {
+        items = getDiscoverForCategory('anime');
       }
+    } else if (sectionId === 'movies') {
+      const tmdbPage = ((page - 1) % 3) + 1;
+      const tmdbMovies = await getTrendingTMDB('movie', 'week', tmdbPage);
+      items = (tmdbMovies || []).map(i => ({ ...i, category: 'movies' }));
+      if (items.length === 0) {
+        const tvm = await fetchTVMazeSeries(Math.max(0, page - 1));
+        items = tvm.slice(0, 20).map(s => ({ ...s, category: 'movies' }));
+      }
+    } else if (sectionId === 'series') {
+      const tmdbPage = ((page - 1) % 3) + 1;
+      const tmdbSeries = await getTrendingTMDB('tv', 'week', tmdbPage);
+      items = (tmdbSeries || []).map(i => ({ ...i, category: 'series' }));
+      if (items.length === 0) {
+        const tvm = await fetchTVMazeSeries(Math.max(0, page - 1));
+        items = tvm.filter(s => s.category === 'series').slice(0, 20);
+        if (items.length === 0) items = tvm.slice(0, 20).map(s => ({ ...s, category: 'series' }));
+      }
+    } else if (sectionId === 'manhwa') {
+      const jikanPage = ((page - 1) % 5) + 1;
+      items = await fetchTopManhwa(jikanPage);
+      items = (items || []).map(i => ({ ...i, category: 'manhwa' }));
+    } else if (sectionId === 'kdrama') {
+      items = await discoverTMDB('tv', { with_original_language: 'ko', with_genres: '18', sort_by: 'popularity.desc', page });
+      items = (items || []).map(i => ({ ...i, category: 'kdrama' }));
+    } else if (sectionId === 'thai') {
+      items = await discoverTMDB('tv', { with_original_language: 'th', with_genres: '18', sort_by: 'popularity.desc', page });
+      items = (items || []).map(i => ({ ...i, category: 'thai' }));
+    } else if (sectionId === 'bl') {
+      items = await discoverTMDB('tv', { with_keywords: '210024', sort_by: 'popularity.desc', page });
+      items = (items || []).map(i => ({ ...i, category: 'bl' }));
+    } else if (sectionId === 'gl') {
+      items = await searchTMDB('girls love ' + page, 'tv');
+      items = (items || []).map(i => ({ ...i, category: 'gl' }));
+    }
 
     // Remove loading placeholder (only page 1)
     if (page === 1) {
@@ -2202,7 +2205,7 @@ async function loadSectionPage(sectionId, page) {
     const oldTarget = row.querySelector('.scroll-target');
     if (oldTarget) oldTarget.remove();
 
-    // Append cards — NO per-card delay (that was killing throughput)
+    // Append cards
     const fragment = document.createDocumentFragment();
     for (const item of items) {
       if (item && item.title) {
@@ -2214,18 +2217,14 @@ async function loadSectionPage(sectionId, page) {
     row.appendChild(fragment);
 
     // Attach new scroll sentinel for next page ALWAYS
-    // Even if items is empty, we attach it so we can retry on scroll
     const sentinel = document.createElement('div');
     sentinel.className = 'scroll-target';
     sentinel.style.cssText = 'flex:0 0 1px;min-width:1px;';
     row.appendChild(sentinel);
 
-    // Use a 400px right margin so next page loads BEFORE user hits the end
     const io = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
         io.disconnect();
-        // Use setTimeout to ensure this triggers on the next tick,
-        // after the current loadSectionPage has fully finished and released the loading lock.
         setTimeout(() => {
           sectionPages[sectionId]++;
           loadSectionPage(sectionId, sectionPages[sectionId]);
@@ -2236,12 +2235,6 @@ async function loadSectionPage(sectionId, page) {
 
   } catch (err) {
     console.error(`[Matrix] Failed to load ${sectionId} p${page}:`, err);
-    // Retry once after 2s on failure
-    setTimeout(() => {
-      loadingSections[sectionId] = false;
-      loadSectionPage(sectionId, page);
-    }, 2000);
-    return;
   } finally {
     loadingSections[sectionId] = false;
     if (page === 1) {

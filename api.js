@@ -235,10 +235,35 @@ export const searchJikan = async (query, type = 'anime') => {
   return data.data.map(item => normalizeJikan(item, category));
 };
 
+const STATIC_TOP_ANIME = [
+  { id: 'an_1', title: 'Jujutsu Kaisen S2', category: 'anime', genre: 'Action', poster: 'https://cdn.myanimelist.net/images/anime/1792/138022.jpg', rating: '8.8', releaseYear: '2023', description: 'Sorcerers battle high-grade curses in Shibuya.', totalEpisodes: 23, episodes: 23 },
+  { id: 'an_2', title: 'Attack on Titan Final Season', category: 'anime', genre: 'Action', poster: 'https://cdn.myanimelist.net/images/anime/1000/110531.jpg', rating: '9.1', releaseYear: '2022', description: 'Eren Yeager leads the ultimate conflict for Eldian freedom.', totalEpisodes: 28, episodes: 28 },
+  { id: 'an_3', title: 'Frieren: Beyond Journey\'s End', category: 'anime', genre: 'Fantasy', poster: 'https://cdn.myanimelist.net/images/anime/1015/138025.jpg', rating: '9.3', releaseYear: '2023', description: 'An elven mage embarks on a journey to reflect on human life and memories.', totalEpisodes: 28, episodes: 28 },
+  { id: 'an_4', title: 'Solo Leveling (Arise)', category: 'anime', genre: 'Action', poster: 'https://uploads.mangadex.org/covers/32d76d19-8a05-4db0-9fc2-e0b0648464d0/d2449bdf-87db-452a-929a-fb08e6e58b1f.jpg.512.jpg', rating: '8.7', releaseYear: '2024', description: 'Sung Jinwoo awakens as the Shadow Monarch in an apocalyptic hunter world.', totalEpisodes: 12, episodes: 12 },
+  { id: 'an_5', title: 'Demon Slayer S4', category: 'anime', genre: 'Action', poster: 'https://cdn.myanimelist.net/images/anime/1242/141381.jpg', rating: '8.9', releaseYear: '2024', description: 'The Hashira train Tanjiro and the Demon Slayers for the final war.', totalEpisodes: 8, episodes: 8 },
+  { id: 'an_6', title: 'Chainsaw Man', category: 'anime', genre: 'Action', poster: 'https://cdn.myanimelist.net/images/anime/1806/126216.jpg', rating: '8.8', releaseYear: '2022', description: 'Denji merges with Pochita to become Chainsaw Man.', totalEpisodes: 12, episodes: 12 },
+  { id: 'an_7', title: 'Bleach: Thousand-Year Blood War', category: 'anime', genre: 'Action', poster: 'https://cdn.myanimelist.net/images/anime/1764/126627.jpg', rating: '9.0', releaseYear: '2022', description: 'The Soul Society is attacked by the Quincy King Yhwach.', totalEpisodes: 26, episodes: 26 },
+  { id: 'an_8', title: 'Blue Lock', category: 'anime', genre: 'Sports', poster: 'https://cdn.myanimelist.net/images/anime/1258/126929.jpg', rating: '8.4', releaseYear: '2022', description: '300 strikers compete in an intense facility to become Japan\'s top goalscorer.', totalEpisodes: 24, episodes: 24 }
+];
+
 export const getTopJikan = async (type = 'anime', page = 1) => {
-  const data = await jikanFetch(`/top/${type}`, { page });
-  if (!data || !data.data) return [];
-  return data.data.map(item => normalizeJikan(item, type));
+  try {
+    const fetchPromise = (async () => {
+      const data = await jikanFetch(`/top/${type}`, { page });
+      if (data && data.data && data.data.length > 0) {
+        return data.data.slice(0, 20).map(item => normalizeJikan(item, type));
+      }
+      return [];
+    })();
+
+    const timeoutPromise = new Promise(resolve => setTimeout(() => resolve([]), 3500));
+    const results = await Promise.race([fetchPromise, timeoutPromise]);
+    if (results && results.length > 0) return results;
+  } catch (e) {
+    console.warn(`Live top ${type} fetch fallback active:`, e);
+  }
+
+  return type === 'anime' ? STATIC_TOP_ANIME : [];
 };
 
 // ============================================================================
