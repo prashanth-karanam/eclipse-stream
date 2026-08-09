@@ -4195,7 +4195,7 @@ input, textarea {
   .section-cards .card-poster {
     height: 180px !important;
   }
-  .hero-populated {
+  .hero-populated:not(.hidden) {
     display: flex !important;
     flex-direction: column !important;
   }
