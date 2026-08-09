@@ -3277,7 +3277,7 @@ function renderProfileTab(tab) {
       })();
     }
 
-    // Community Roster: Show all registered user names
+    // Community Roster: Show all registered user names with live count
     let commSection = $('#communityRosterSection');
     if (!commSection) {
       commSection = document.createElement('div');
@@ -3287,7 +3287,7 @@ function renderProfileTab(tab) {
     }
     
     commSection.innerHTML = `
-      <div class="titlelist-group-label">Eclipse Registered Community Users</div>
+      <div class="titlelist-group-label" id="communityRosterTitle">Eclipse Community Members</div>
       <div id="communityUsersList" style="margin-top: 8px;">
         <div style="color: var(--text-muted); font-size: 13px; padding: 10px 0; text-align: center;">Loading registered users...</div>
       </div>
@@ -3302,12 +3302,26 @@ function renderProfileTab(tab) {
           commContainer.innerHTML = '<div style="color:var(--text-muted); font-size:13px; padding:8px 0; text-align:center;">No users registered yet. Be the first!</div>';
           return;
         }
+
+        const titleEl = $('#communityRosterTitle');
+        if (titleEl) {
+          titleEl.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; width:100%;"><span>Eclipse Community Members</span><span class="ih-badge" style="background:rgba(34,229,208,0.15); color:var(--cyan); padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700;">${snapshot.size} Registered</span></div>`;
+        }
+
         let cHtml = '';
         snapshot.forEach(docSnap => {
           const u = docSnap.data();
           const uid = docSnap.id;
           const uName = u.username || u.email || 'Registered User';
           const isSelf = state.user && uid === state.user.uid;
+          const isAlreadyFriend = userFriends.includes(uid);
+
+          const actionHtml = isSelf 
+            ? '<span class="status-badge status-badge--completed" style="font-size:10px;">You</span>' 
+            : (isAlreadyFriend 
+              ? '<span class="status-badge status-badge--watching" style="font-size:10px; background:rgba(34,229,208,0.15); color:var(--cyan);">✓ Friend</span>' 
+              : `<button class="progress-item__action-btn progress-item__action-btn--primary comm-add-friend-btn" data-uid="${uid}" data-username="${uName}" style="font-size:11px;padding:4px 10px;">Add Friend</button>`);
+
           cHtml += `
             <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; margin-bottom: 8px;">
               <div style="display: flex; align-items: center; gap: 10px;">
@@ -3317,46 +3331,79 @@ function renderProfileTab(tab) {
                   <div style="font-size: 11px; color: var(--text-muted);">${u.email || 'User'}</div>
                 </div>
               </div>
-              ${isSelf ? '<span class="status-badge status-badge--completed" style="font-size:10px;">You</span>' : `<button class="progress-item__action-btn progress-item__action-btn--primary add-friend-btn" data-uid="${uid}" data-username="${uName}" style="font-size:11px;padding:4px 10px;">Add Friend</button>`}
+              ${actionHtml}
             </div>
           `;
         });
         commContainer.innerHTML = cHtml;
+
+        // Wire up buttons in community list
+        commContainer.querySelectorAll('.comm-add-friend-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const friendUid = e.target.dataset.uid;
+            const friendName = e.target.dataset.username;
+            if (!state.user) {
+              alert('Please sign in to add friends!');
+              return;
+            }
+            try {
+              e.target.textContent = 'Adding...';
+              e.target.disabled = true;
+              const myDocRef = doc(db, 'users', state.user.uid);
+              await updateDoc(myDocRef, {
+                friends: arrayUnion(friendUid)
+              });
+              showUndoToast(`Added ${friendName} to your friends!`);
+              renderFriendsView();
+            } catch(err) {
+              console.error('Error adding friend:', err);
+              e.target.textContent = 'Add Friend';
+              e.target.disabled = false;
+            }
+          });
+        });
       } catch(e) {
-        commContainer.innerHTML = `<div style="color:var(--text-muted); font-size:13px; padding:8px 0; text-align:center;">Local Session — Login to sync global community roster</div>`;
+        console.error('Roster fetch error:', e);
+        commContainer.innerHTML = `<div style="color:var(--text-muted); font-size:13px; padding:8px 0; text-align:center;">Connect account to sync community roster</div>`;
       }
     })();
 
-    // Search logic
+    // Search logic with partial matching fallback
     const handleFriendSearch = async () => {
       const q = $('#friendSearchInput').value.trim();
       const resultsContainer = $('#friendSearchResults');
       if (!q) return;
 
-      resultsContainer.innerHTML = '<div style="color:var(--text-muted); font-size:13px; padding: 8px 0;">Searching...</div>';
+      resultsContainer.innerHTML = '<div style="color:var(--text-muted); font-size:13px; padding: 8px 0;">Searching community...</div>';
       
       try {
         const qLower = q.toLowerCase();
         const usersRef = collection(db, 'users');
-        let qry = query(usersRef, where('username_lowercase', '==', qLower));
-        let snapshot = await getDocs(qry);
+        const snapshot = await getDocs(usersRef);
         
         if (snapshot.empty) {
-          qry = query(usersRef, where('username', '==', q));
-          snapshot = await getDocs(qry);
+          resultsContainer.innerHTML = '<div style="color:var(--violet); font-size:13px; padding: 8px 0;">No registered users found.</div>';
+          return;
         }
 
-        if (snapshot.empty) {
-          resultsContainer.innerHTML = '<div style="color:var(--violet); font-size:13px; padding: 8px 0;">No user found with that username.</div>';
+        const matches = [];
+        snapshot.forEach(docSnap => {
+          const u = docSnap.data();
+          const uid = docSnap.id;
+          const uName = u.username || u.email || '';
+          if (uName.toLowerCase().includes(qLower) || (u.email && u.email.toLowerCase().includes(qLower))) {
+            matches.push({ uid, u });
+          }
+        });
+
+        if (matches.length === 0) {
+          resultsContainer.innerHTML = '<div style="color:var(--violet); font-size:13px; padding: 8px 0;">No user found matching "' + q + '".</div>';
           return;
         }
 
         let html = '';
-        snapshot.forEach(docSnap => {
-          const u = docSnap.data();
-          const uid = docSnap.id;
+        matches.forEach(({ uid, u }) => {
           if (state.user && uid === state.user.uid) return; // skip self
-          
           const isAlreadyFriend = userFriends.includes(uid);
           const uName = u.username || u.email;
 
@@ -3370,7 +3417,7 @@ function renderProfileTab(tab) {
                 </div>
               </div>
               ${isAlreadyFriend ? 
-                `<span class="status-badge status-badge--completed" style="font-size: 11px;">Already Friend</span>` :
+                `<span class="status-badge status-badge--completed" style="font-size: 11px;">✓ Friend</span>` :
                 `<button class="progress-item__action-btn progress-item__action-btn--primary add-friend-btn" data-uid="${uid}" data-username="${uName}">Add Friend</button>`
               }
             </div>
@@ -3393,7 +3440,6 @@ function renderProfileTab(tab) {
                 friends: arrayUnion(friendUid)
               });
               
-              // Update local state profile
               if (!state.userProfile) state.userProfile = {};
               state.userProfile.friends = state.userProfile.friends || [];
               if (!state.userProfile.friends.includes(friendUid)) {
@@ -3402,9 +3448,7 @@ function renderProfileTab(tab) {
 
               showUndoToast(`Added ${friendUsername} as a friend!`);
               btn.textContent = 'Added ✓';
-              
-              // Refresh tab
-              renderProfileTab('friends');
+              renderFriendsView();
             } catch (err) {
               console.error('Failed to add friend:', err);
               btn.textContent = 'Add Friend';
