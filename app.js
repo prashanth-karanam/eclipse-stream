@@ -1208,22 +1208,22 @@ function renderOverviewTab() {
       <!-- Big Stats Row -->
       <div class="ih-stats-row">
         <div class="ih-stat" style="--clr:#FF4B4B">
-          <div class="ih-stat__icon">📺</div>
+          <div class="ih-stat__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF4B4B" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg></div>
           <div class="ih-stat__num" data-count="${watching.length}">${watching.length}</div>
           <div class="ih-stat__lbl">Watching</div>
         </div>
         <div class="ih-stat" style="--clr:#10B981">
-          <div class="ih-stat__icon">✅</div>
+          <div class="ih-stat__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
           <div class="ih-stat__num" data-count="${completed.length}">${completed.length}</div>
           <div class="ih-stat__lbl">Completed</div>
         </div>
         <div class="ih-stat" style="--clr:#F59E0B">
-          <div class="ih-stat__icon">📋</div>
+          <div class="ih-stat__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></div>
           <div class="ih-stat__num" data-count="${planning.length}">${planning.length}</div>
           <div class="ih-stat__lbl">Planning</div>
         </div>
         <div class="ih-stat" style="--clr:#FF6B35">
-          <div class="ih-stat__icon">🔥</div>
+          <div class="ih-stat__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3.5z"/></svg></div>
           <div class="ih-stat__num">${streak}</div>
           <div class="ih-stat__lbl">Day Streak</div>
         </div>
@@ -1232,13 +1232,13 @@ function renderOverviewTab() {
       <!-- Watch Time + Chapters hero cards -->
       <div class="ih-hero-metrics">
         <div class="ih-metric-card" style="--grad: linear-gradient(135deg,#FF4B4B22,#FF4B4B08)">
-          <div class="ih-metric-card__icon">⏱️</div>
+          <div class="ih-metric-card__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF4B4B" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
           <div class="ih-metric-card__val">${watchHours >= 1000 ? (watchHours/1000).toFixed(1)+'k' : watchHours.toFixed(0)}h</div>
           <div class="ih-metric-card__sub">Total Watch Time</div>
           <div class="ih-metric-card__bar"><div style="width:${Math.min(100, (watchHours/500)*100)}%;background:linear-gradient(90deg,#FF4B4B,#FF8C42);"></div></div>
         </div>
         <div class="ih-metric-card" style="--grad: linear-gradient(135deg,#9B5CFF22,#9B5CFF08)">
-          <div class="ih-metric-card__icon">📖</div>
+          <div class="ih-metric-card__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9B5CFF" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
           <div class="ih-metric-card__val">${chaptersRead.toLocaleString()}</div>
           <div class="ih-metric-card__sub">Chapters Read</div>
           <div class="ih-metric-card__bar"><div style="width:${Math.min(100,(chaptersRead/1000)*100)}%;background:linear-gradient(90deg,#9B5CFF,#C084FC);"></div></div>
@@ -1249,10 +1249,10 @@ function renderOverviewTab() {
       <div class="ih-section-title">Category Analytics (Click to View Titles)</div>
       <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:10px; margin-bottom:12px;">
         ${[
-          { key:'anime', icon:'🎌', name:'Anime', clr:'#FF4B4B' },
-          { key:'manhwa', icon:'📖', name:'Manhwa', clr:'#9B5CFF' },
-          { key:'series', icon:'📺', name:'Series', clr:'#F59E0B' },
-          { key:'movies', icon:'🎬', name:'Movies', clr:'#22E5D0' }
+          { key:'anime', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF4B4B" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>`, name:'Anime', clr:'#FF4B4B' },
+          { key:'manhwa', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9B5CFF" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`, name:'Manhwa', clr:'#9B5CFF' },
+          { key:'series', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>`, name:'Series', clr:'#F59E0B' },
+          { key:'movies', icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22E5D0" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 4v16M18 4v16M2 8h20M2 16h20"/></svg>`, name:'Movies', clr:'#22E5D0' }
         ].map(cat => {
           const catTitles = titles.filter(t => t.category === cat.key || (cat.key === 'series' && ['kdrama','bl','gl','thai','series','tv'].includes(t.category)));
           const catDone = catTitles.filter(t => t.status === 'completed').length;
@@ -1263,7 +1263,7 @@ function renderOverviewTab() {
           return `
             <div class="ih-stat" style="--clr:${cat.clr}; cursor:pointer; padding:12px; display:flex; flex-direction:column; align-items:flex-start;" onclick="window._insightsExpandCategory('${cat.key}')">
               <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:4px;">
-                <span style="font-size:20px;">${cat.icon}</span>
+                <span>${cat.icon}</span>
                 <span style="font-size:10px; font-weight:700; color:var(--text-muted); background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:10px;">${catDone}/${catTitles.length} Done</span>
               </div>
               <div style="font-size:14px; font-weight:800; color:var(--text-primary); margin-top:2px;">${cat.name}</div>
@@ -1275,7 +1275,7 @@ function renderOverviewTab() {
         <!-- Summary All Card -->
         <div class="ih-stat" style="--clr:#10B981; cursor:pointer; padding:12px; grid-column: 1 / -1; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg, rgba(16,185,129,0.12), rgba(34,229,208,0.05)); border:1px solid rgba(16,185,129,0.3);" onclick="window._insightsExpandCategory('all')">
           <div style="display:flex; align-items:center; gap:10px;">
-            <span style="font-size:22px;">🌌</span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
             <div>
               <div style="font-size:14px; font-weight:800; color:#10B981;">All Categories Summary</div>
               <div style="font-size:11px; color:var(--text-muted);">${titles.length} Titles · ${completed.length} Completed (${compRate}% Rate)</div>
@@ -1411,14 +1411,22 @@ function renderAnalyticsTab() {
         <div class="ih-cat-table__head">
           <span>Category</span><span>Titles</span><span>Watched</span><span>Done</span>
         </div>
-        ${Object.entries(catStats).map(([cat, s]) => `
-          <div class="ih-cat-table__row">
-            <span>${{anime:'🎌',series:'📺',movies:'🎬',manhwa:'📖'}[cat]} ${cat.charAt(0).toUpperCase()+cat.slice(1)}</span>
-            <span>${s.count}</span>
-            <span>${s.watchedUnits} ${cat==='manhwa'?'ch':'ep'}</span>
-            <span style="color:#10b981">${s.completedCount}</span>
-          </div>
-        `).join('')}
+        ${Object.entries(catStats).map(([cat, s]) => {
+          const catSvg = {
+            anime: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4B4B" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>`,
+            series: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>`,
+            movies: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22E5D0" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 4v16M18 4v16M2 8h20M2 16h20"/></svg>`,
+            manhwa: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9B5CFF" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`
+          }[cat] || '';
+          return `
+            <div class="ih-cat-table__row">
+              <span>${catSvg}${cat.charAt(0).toUpperCase()+cat.slice(1)}</span>
+              <span>${s.count}</span>
+              <span>${s.watchedUnits} ${cat==='manhwa'?'ch':'ep'}</span>
+              <span style="color:#10b981">${s.completedCount}</span>
+            </div>
+          `;
+        }).join('')}
       </div>
 
       <!-- Completion funnel -->
@@ -1447,18 +1455,18 @@ function renderAchievementsTab() {
   const totalCh = titles.filter(t => t.category === 'manhwa').reduce((s,t) => s + (t.progress||0), 0);
 
   const ACHIEVEMENTS_DEF = [
-    { id:'first_add', icon:'🌟', label:'First Steps', desc:'Add your first title', clr:'#F59E0B', condition: () => titles.length >= 1 },
-    { id:'first_done', icon:'✅', label:'Finisher', desc:'Complete your first title', clr:'#10B981', condition: () => completed.length >= 1 },
-    { id:'binge_5', icon:'📺', label:'Binge Mode', desc:'Add 5 or more titles', clr:'#22E5D0', condition: () => titles.length >= 5 },
-    { id:'complete_10', icon:'🏆', label:'Champion', desc:'Complete 10 titles', clr:'#FF4B4B', condition: () => completed.length >= 10 },
-    { id:'ep_100', icon:'🎬', label:'100 Club', desc:'Watch 100+ episodes', clr:'#9B5CFF', condition: () => totalEps >= 100 },
-    { id:'ep_1000', icon:'⚡', label:'Episode God', desc:'Watch 1000+ episodes', clr:'#FF6B35', condition: () => totalEps >= 1000 },
-    { id:'ch_100', icon:'📖', label:'Page Turner', desc:'Read 100+ chapters', clr:'#C084FC', condition: () => totalCh >= 100 },
-    { id:'all_cats', icon:'🌍', label:'All-Rounder', desc:'Explore all 4 categories', clr:'#06D6A0', condition: () => categories.size >= 4 },
-    { id:'streak7', icon:'🔥', label:'Week Warrior', desc:'7-day activity streak', clr:'#FF4B4B', condition: () => streak >= 7 },
-    { id:'streak30', icon:'💫', label:'Monthly Devotion', desc:'30-day streak', clr:'#F59E0B', condition: () => streak >= 30 },
-    { id:'night_owl', icon:'🌌', label:'Night Owl', desc:'Watched something after midnight', clr:'#4F46E5', condition: () => false },
-    { id:'completionist', icon:'💯', label:'Perfectionist', desc:'100% complete all added titles', clr:'#10B981', condition: () => titles.length > 0 && titles.every(t => t.status === 'completed') },
+    { id:'first_add', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`, label:'First Steps', desc:'Add your first title', clr:'#F59E0B', condition: () => titles.length >= 1 },
+    { id:'first_done', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`, label:'Finisher', desc:'Complete your first title', clr:'#10B981', condition: () => completed.length >= 1 },
+    { id:'binge_5', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22E5D0" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>`, label:'Binge Mode', desc:'Add 5 or more titles', clr:'#22E5D0', condition: () => titles.length >= 5 },
+    { id:'complete_10', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF4B4B" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>`, label:'Champion', desc:'Complete 10 titles', clr:'#FF4B4B', condition: () => completed.length >= 10 },
+    { id:'ep_100', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9B5CFF" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 4v16M18 4v16M2 8h20M2 16h20"/></svg>`, label:'100 Club', desc:'Watch 100+ episodes', clr:'#9B5CFF', condition: () => totalEps >= 100 },
+    { id:'ep_1000', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`, label:'Episode God', desc:'Watch 1000+ episodes', clr:'#FF6B35', condition: () => totalEps >= 1000 },
+    { id:'ch_100', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C084FC" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`, label:'Page Turner', desc:'Read 100+ chapters', clr:'#C084FC', condition: () => totalCh >= 100 },
+    { id:'all_cats', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06D6A0" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>`, label:'All-Rounder', desc:'Explore all 4 categories', clr:'#06D6A0', condition: () => categories.size >= 4 },
+    { id:'streak7', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF4B4B" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3.5z"/></svg>`, label:'Week Warrior', desc:'7-day activity streak', clr:'#FF4B4B', condition: () => streak >= 7 },
+    { id:'streak30', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`, label:'Monthly Devotion', desc:'30-day streak', clr:'#F59E0B', condition: () => streak >= 30 },
+    { id:'night_owl', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`, label:'Night Owl', desc:'Watched something after midnight', clr:'#4F46E5', condition: () => false },
+    { id:'completionist', icon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`, label:'Perfectionist', desc:'100% complete all added titles', clr:'#10B981', condition: () => titles.length > 0 && titles.every(t => t.status === 'completed') },
   ];
 
   const unlocked = ACHIEVEMENTS_DEF.filter(a => a.condition());
