@@ -1547,6 +1547,26 @@ function renderAchievementsTab() {
   `;
 }
 
+const ORACLE_MASTER_POOL = [
+  { title: 'Solo Leveling (Arise)', category: 'anime', genre: 'Action · Fantasy', rating: '8.7', match: '99%', desc: 'In a world where hunters battle deadly monsters, weak hunter Sung Jinwoo gets a second chance.', poster: 'https://cdn.myanimelist.net/images/anime/1521/140924.jpg' },
+  { title: 'Omniscient Reader\'s Viewpoint', category: 'manhwa', genre: 'Action · System', rating: '9.4', match: '98%', desc: 'Kim Dokja is the sole reader of a web novel. Suddenly, the novel becomes real life.', poster: 'https://uploads.mangadex.org/covers/e005080e-3b56-4dc5-b461-750d686f082e/6b010c2c-e11f-49e0-88cb-7e23b2c4e2cf.jpg.256.jpg' },
+  { title: 'Chainsaw Man', category: 'anime', genre: 'Action · Supernatural', rating: '8.8', match: '96%', desc: 'Denji makes a contract with the Chainsaw Devil and becomes a devil hunter for the Public Safety Bureau.', poster: 'https://cdn.myanimelist.net/images/anime/1806/126216.jpg' },
+  { title: 'The Glory', category: 'series', genre: 'K-Drama · Revenge', rating: '8.8', match: '95%', desc: 'Years after surviving horrific abuse in high school, a woman puts an elaborate revenge plan in motion.', poster: 'https://image.tmdb.org/t/p/w500/6jO24y0x6Neq4lS6o1n1s54.jpg' },
+  { title: 'Cyberpunk: Edgerunners', category: 'anime', genre: 'Sci-Fi · Cyberpunk', rating: '8.6', match: '94%', desc: 'A street kid trying to survive in a technology-obsessed city becomes an edgerunner mercenary.', poster: 'https://cdn.myanimelist.net/images/anime/1818/126436.jpg' },
+  { title: 'Tower of God', category: 'manhwa', genre: 'Action · Mystery', rating: '9.2', match: '97%', desc: 'Bam enters the mysterious Tower to find his childhood friend Rachel, facing deadly trials on every floor.', poster: 'https://cdn.myanimelist.net/images/manga/2/186595.jpg' },
+  { title: 'Attack on Titan Final Season', category: 'anime', genre: 'Action · Dark Fantasy', rating: '9.1', match: '98%', desc: 'Eren Yeager vows to cleanse the world of Titans after his hometown is destroyed.', poster: 'https://cdn.myanimelist.net/images/anime/1000/110531.jpg' },
+  { title: 'Vincenzo', category: 'series', genre: 'K-Drama · Crime Comedy', rating: '8.5', match: '93%', desc: 'An Italian mafia lawyer returns to South Korea and uses villainous tactics to defeat unpunishable cartels.', poster: 'https://image.tmdb.org/t/p/w500/vD2w3o0D2z6n1.jpg' },
+  { title: 'Wind Breaker', category: 'manhwa', genre: 'Sports · Action', rating: '9.4', match: '96%', desc: 'Jay is a top student whose secret passion is street bicycle racing with his crew.', poster: 'https://cdn.myanimelist.net/images/manga/3/178729.jpg' },
+  { title: 'Bleach: Thousand-Year Blood War', category: 'anime', genre: 'Action · Supernatural', rating: '9.0', match: '97%', desc: 'Ichigo Kurosaki and the Soul Reapers face their ultimate nemesis: the Quincy Empire.', poster: 'https://cdn.myanimelist.net/images/anime/1764/126627.jpg' },
+  { title: 'Steins;Gate', category: 'anime', genre: 'Sci-Fi · Time Travel', rating: '9.1', match: '95%', desc: 'A self-proclaimed mad scientist accidentally invents a microwave that can send text messages to the past.', poster: 'https://cdn.myanimelist.net/images/anime/1935/127974.jpg' },
+  { title: 'The Beginning After the End', category: 'manhwa', genre: 'Fantasy · Reincarnation', rating: '9.6', match: '98%', desc: 'A powerful king is reincarnated in a world filled with magic and monsters.', poster: 'https://cdn.myanimelist.net/images/manga/2/227488.jpg' },
+  { title: 'Squid Game', category: 'series', genre: 'K-Drama · Thriller', rating: '8.4', match: '92%', desc: 'Hundreds of cash-strapped players accept a strange invitation to compete in children\'s games for a massive prize.', poster: 'https://image.tmdb.org/t/p/w500/d5NXSklXo0qyIYkgV94.jpg' },
+  { title: 'Demon Slayer: Hashira Training', category: 'anime', genre: 'Action · Supernatural', rating: '8.9', match: '96%', desc: 'Tanjiro undergoes intense training with the Hashira to prepare for the final battle against Muzan.', poster: 'https://cdn.myanimelist.net/images/anime/1242/141381.jpg' },
+  { title: 'Eleceed', category: 'manhwa', genre: 'Action · Comedy', rating: '9.7', match: '99%', desc: 'A cat-bodied secret agent trains a high schooler with secret lightning powers.', poster: 'https://cdn.myanimelist.net/images/manga/3/229047.jpg' }
+];
+
+let oracleCurrentOffset = 0;
+
 function renderOracleTab() {
   const titles = state.titles || [];
   const topCategory = (() => {
@@ -1561,13 +1581,9 @@ function renderOracleTab() {
     return Object.keys(genres).sort((a,b) => genres[b] - genres[a])[0] || 'Action';
   })();
 
-  const oraclePicks = [
-    { title: 'Solo Leveling (Arise)', category: 'anime', genre: 'Action · Fantasy', rating: '8.7', match: '99%', desc: 'In a world where hunters battle deadly monsters, weak hunter Sung Jinwoo gets a second chance.', poster: 'https://cdn.myanimelist.net/images/anime/1521/140924.jpg' },
-    { title: 'Omniscient Reader\'s Viewpoint', category: 'manhwa', genre: 'Action · System', rating: '9.4', match: '98%', desc: 'Kim Dokja is the sole reader of a web novel. Suddenly, the novel becomes real life.', poster: 'https://uploads.mangadex.org/covers/e005080e-3b56-4dc5-b461-750d686f082e/6b010c2c-e11f-49e0-88cb-7e23b2c4e2cf.jpg.256.jpg' },
-    { title: 'Chainsaw Man', category: 'anime', genre: 'Action · Supernatural', rating: '8.8', match: '95%', desc: 'Denji makes a contract with the Chainsaw Devil and becomes a devil hunter for the Public Safety Bureau.', poster: 'https://cdn.myanimelist.net/images/anime/1806/126216.jpg' },
-    { title: 'The Glory (K-Drama)', category: 'series', genre: 'K-Drama · Revenge', rating: '8.8', match: '93%', desc: 'Years after surviving horrific abuse in high school, a woman puts an elaborate revenge plan in motion.', poster: 'https://image.tmdb.org/t/p/w500/6jO24y0x6Neq4lS6o1n1s54.jpg' },
-    { title: 'Cyberpunk: Edgerunners', category: 'anime', genre: 'Sci-Fi · Cyberpunk', rating: '8.6', match: '92%', desc: 'A street kid trying to survive in a technology-obsessed city becomes an edgerunner mercenary.', poster: 'https://cdn.myanimelist.net/images/anime/1818/126436.jpg' }
-  ];
+  // Rotate through the pool of 15 titles 5 at a time
+  const startIdx = (oracleCurrentOffset * 5) % ORACLE_MASTER_POOL.length;
+  const oraclePicks = ORACLE_MASTER_POOL.slice(startIdx, startIdx + 5);
 
   const cardsHtml = oraclePicks.map(p => `
     <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 14px; display: flex; gap: 14px; margin-bottom: 12px; align-items: center; transition: border-color 0.2s;" onmouseover="this.style.borderColor='var(--cyan)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
@@ -1595,13 +1611,13 @@ function renderOracleTab() {
         <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800; color: #fff;">Oracle AI Recommendation Engine</h3>
         <p style="margin: 0 0 14px 0; font-size: 12px; color: var(--text-secondary);">Synthesized for your affinity: <strong style="color: var(--cyan);">${topGenre}</strong> & <strong style="color: var(--violet);">${topCategory.toUpperCase()}</strong></p>
         <button id="oracleReSynthesizeBtn" class="btn-primary" style="font-weight:800; font-size:12px; padding:8px 18px; border-radius:20px; background:linear-gradient(135deg, var(--violet), var(--cyan)); border:none;">
-          🔮 Consult Oracle Ritual
+          🔮 Consult Oracle Ritual (Fresh Batch)
         </button>
       </div>
 
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
         <span style="font-size: 14px; font-weight: 800; color: var(--text-primary);">Top Affinity Curations</span>
-        <span style="font-size: 11px; color: var(--cyan); font-weight: 700;">5 Matches Ready</span>
+        <span style="font-size: 11px; color: var(--cyan); font-weight: 700;">5 Fresh Matches Ready</span>
       </div>
       <div id="oracleRecommendationsList">
         ${cardsHtml}
@@ -1661,10 +1677,11 @@ function attachInsightsListeners() {
     oracleBtn.onclick = () => {
       oracleBtn.innerHTML = '✨ Resynthesizing Crystal Grid...';
       oracleBtn.disabled = true;
+      oracleCurrentOffset++;
       setTimeout(() => {
         showUndoToast('🔮 Oracle AI Ritual Complete: 5 Fresh Curations Synthesized!');
         switchInsightsTab('oracle');
-      }, 400);
+      }, 300);
     };
   }
 }
