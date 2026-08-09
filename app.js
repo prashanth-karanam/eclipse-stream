@@ -64,12 +64,19 @@ const POSTER_MAP = {
   'Blue Lock': 'https://cdn.myanimelist.net/images/anime/1258/126929.jpg',
   'Mushoku Tensei S2': 'https://cdn.myanimelist.net/images/anime/1028/137784.jpg',
   'Tower of God': 'https://cdn.myanimelist.net/images/anime/1702/106229.jpg',
-  'The Beginning After The End': 'https://cdn.myanimelist.net/images/manga/1/256722.jpg',
-  'Omniscient Reader': 'https://cdn.myanimelist.net/images/manga/3/232479.jpg',
-  'Omniscient Reader\'s Viewpoint': 'https://cdn.myanimelist.net/images/manga/3/232479.jpg',
-  'Lookism': 'https://cdn.myanimelist.net/images/manga/2/168494.jpg',
-  'Wind Breaker': 'https://cdn.myanimelist.net/images/anime/1376/142144.jpg',
-  'Wind Breaker S2': 'https://cdn.myanimelist.net/images/anime/1376/142144.jpg',
+  'The Beginning After The End': 'https://uploads.mangadex.org/covers/f4a0c878-5e83-4a11-897b-edab9c1b72e5/6ea9f1e1-e18e-49b0-a39c-f9e422c54ee7.jpg.512.jpg',
+  'The Beginning After the End': 'https://uploads.mangadex.org/covers/f4a0c878-5e83-4a11-897b-edab9c1b72e5/6ea9f1e1-e18e-49b0-a39c-f9e422c54ee7.jpg.512.jpg',
+  'Omniscient Reader': 'https://uploads.mangadex.org/covers/e005080e-3b56-4dc5-b461-750d686f082e/6b010c2c-e11f-49e0-88cb-7e23b2c4e2cf.jpg.512.jpg',
+  'Omniscient Reader\'s Viewpoint': 'https://uploads.mangadex.org/covers/e005080e-3b56-4dc5-b461-750d686f082e/6b010c2c-e11f-49e0-88cb-7e23b2c4e2cf.jpg.512.jpg',
+  'Lookism': 'https://uploads.mangadex.org/covers/6f0270a2-23f4-4113-90d5-e2f07d2c3e1e/b71a2571-081e-450f-90e1-0c58a697669d.jpg.512.jpg',
+  'Wind Breaker': 'https://uploads.mangadex.org/covers/3522f18f-ebbc-4995-bb04-f65582f3ef0d/8e25dd05-e325-4c07-9b2f-12ee499d3e81.jpg.512.jpg',
+  'Eleceed': 'https://uploads.mangadex.org/covers/3f8221c9-7e05-41e9-9189-980b62854964/6b2ebed5-c0ea-46b0-99e7-d95b5832e8bb.jpg.512.jpg',
+  'Tower of God': 'https://uploads.mangadex.org/covers/c600f681-300e-436f-b258-154df656a88b/a9c1c4e7-4958-45d2-a734-b25a3962d854.jpg.512.jpg',
+  'Solo Leveling': 'https://uploads.mangadex.org/covers/32d76d19-8a05-4db0-9fc2-e0b0648464d0/d2449bdf-87db-452a-929a-fb08e6e58b1f.jpg.512.jpg',
+  'Nanomachine': 'https://uploads.mangadex.org/covers/71eb6772-5b91-49b5-8c76-574a445e9988/443f11bc-993d-4c38-89c0-9a3d463e2324.jpg.512.jpg',
+  'Nano Machine': 'https://uploads.mangadex.org/covers/71eb6772-5b91-49b5-8c76-574a445e9988/443f11bc-993d-4c38-89c0-9a3d463e2324.jpg.512.jpg',
+  'Return of the Blossoming Blade': 'https://uploads.mangadex.org/covers/47b4e6d3-2f08-410a-9d62-9e9eb0eb292d/fa3b1d31-4a4c-473d-82d2-8b2b6c9b6851.jpg.512.jpg',
+  'Sakamoto Days': 'https://uploads.mangadex.org/covers/9963f458-75c6-43d9-9524-74ea0b32fb10/893c52a0-4357-418d-8c43-5240c5f59047.jpg.512.jpg',
   'Breaking Bad': 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&auto=format&fit=crop',
   'Stranger Things S4': 'https://images.unsplash.com/photo-1618519764620-7403abdbdf9c?w=400&auto=format&fit=crop',
   'The Bear S3': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&auto=format&fit=crop',
@@ -87,22 +94,19 @@ const POSTER_MAP = {
   'Godzilla Minus One': 'https://images.unsplash.com/photo-1596726915152-7e79393a5ea4?w=400&auto=format&fit=crop',
   'Dandadan': 'https://cdn.myanimelist.net/images/anime/1131/144901.jpg',
   'Kaiju No. 8': 'https://cdn.myanimelist.net/images/anime/1968/141443.jpg',
-  'Sakamoto Days': 'https://cdn.myanimelist.net/images/manga/3/240507.jpg',
   'Sousou no Frieren Movie': 'https://cdn.myanimelist.net/images/anime/1015/138025.jpg',
   'Oshi No Ko S2': 'https://cdn.myanimelist.net/images/anime/1917/142985.jpg',
-  'Return of the Blossoming Blade': 'https://cdn.myanimelist.net/images/manga/1/249969.jpg',
   'The Penguin': 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&auto=format&fit=crop',
   'Arcane S2': 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&auto=format&fit=crop',
   'Civil War': 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&auto=format&fit=crop',
   'Alien: Romulus': 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&auto=format&fit=crop',
-  'Nano Machine': 'https://cdn.myanimelist.net/images/manga/1/237375.jpg',
   'Re:Zero S3': 'https://cdn.myanimelist.net/images/anime/1206/141870.jpg',
   'My Happy Marriage S2': 'https://cdn.myanimelist.net/images/anime/1483/135505.jpg',
   'Ripley': 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&auto=format&fit=crop',
   'Furiosa': 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&auto=format&fit=crop'
 };
 
-const FALLBACK_POSTER = 'https://cdn.myanimelist.net/images/anime/1015/138025.jpg';
+const FALLBACK_POSTER = 'https://uploads.mangadex.org/covers/32d76d19-8a05-4db0-9fc2-e0b0648464d0/d2449bdf-87db-452a-929a-fb08e6e58b1f.jpg.512.jpg';
 
 function getPoster(item) {
   let url = null;
@@ -121,7 +125,7 @@ function getPoster(item) {
   // Category fallback high-res posters
   const cat = item.category || 'anime';
   if (cat === 'anime') return 'https://cdn.myanimelist.net/images/anime/1015/138025.jpg';
-  if (cat === 'manhwa') return 'https://cdn.myanimelist.net/images/manga/1/256722.jpg';
+  if (cat === 'manhwa') return 'https://uploads.mangadex.org/covers/32d76d19-8a05-4db0-9fc2-e0b0648464d0/d2449bdf-87db-452a-929a-fb08e6e58b1f.jpg.512.jpg';
   if (cat === 'series') return 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&auto=format&fit=crop';
   return 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&auto=format&fit=crop';
 }
@@ -1548,21 +1552,21 @@ function renderAchievementsTab() {
 }
 
 const ORACLE_MASTER_POOL = [
-  { title: 'Solo Leveling (Arise)', category: 'anime', genre: 'Action · Fantasy', rating: '8.7', match: '99%', desc: 'In a world where hunters battle deadly monsters, weak hunter Sung Jinwoo gets a second chance.', poster: 'https://cdn.myanimelist.net/images/anime/1521/140924.jpg' },
-  { title: 'Omniscient Reader\'s Viewpoint', category: 'manhwa', genre: 'Action · System', rating: '9.4', match: '98%', desc: 'Kim Dokja is the sole reader of a web novel. Suddenly, the novel becomes real life.', poster: 'https://uploads.mangadex.org/covers/e005080e-3b56-4dc5-b461-750d686f082e/6b010c2c-e11f-49e0-88cb-7e23b2c4e2cf.jpg.256.jpg' },
+  { title: 'Solo Leveling (Arise)', category: 'anime', genre: 'Action · Fantasy', rating: '8.7', match: '99%', desc: 'In a world where hunters battle deadly monsters, weak hunter Sung Jinwoo gets a second chance.', poster: 'https://uploads.mangadex.org/covers/32d76d19-8a05-4db0-9fc2-e0b0648464d0/d2449bdf-87db-452a-929a-fb08e6e58b1f.jpg.512.jpg' },
+  { title: 'Omniscient Reader\'s Viewpoint', category: 'manhwa', genre: 'Action · System', rating: '9.4', match: '98%', desc: 'Kim Dokja is the sole reader of a web novel. Suddenly, the novel becomes real life.', poster: 'https://uploads.mangadex.org/covers/e005080e-3b56-4dc5-b461-750d686f082e/6b010c2c-e11f-49e0-88cb-7e23b2c4e2cf.jpg.512.jpg' },
   { title: 'Chainsaw Man', category: 'anime', genre: 'Action · Supernatural', rating: '8.8', match: '96%', desc: 'Denji makes a contract with the Chainsaw Devil and becomes a devil hunter for the Public Safety Bureau.', poster: 'https://cdn.myanimelist.net/images/anime/1806/126216.jpg' },
   { title: 'The Glory', category: 'series', genre: 'K-Drama · Revenge', rating: '8.8', match: '95%', desc: 'Years after surviving horrific abuse in high school, a woman puts an elaborate revenge plan in motion.', poster: 'https://image.tmdb.org/t/p/w500/6jO24y0x6Neq4lS6o1n1s54.jpg' },
   { title: 'Cyberpunk: Edgerunners', category: 'anime', genre: 'Sci-Fi · Cyberpunk', rating: '8.6', match: '94%', desc: 'A street kid trying to survive in a technology-obsessed city becomes an edgerunner mercenary.', poster: 'https://cdn.myanimelist.net/images/anime/1818/126436.jpg' },
-  { title: 'Tower of God', category: 'manhwa', genre: 'Action · Mystery', rating: '9.2', match: '97%', desc: 'Bam enters the mysterious Tower to find his childhood friend Rachel, facing deadly trials on every floor.', poster: 'https://cdn.myanimelist.net/images/manga/2/186595.jpg' },
+  { title: 'Tower of God', category: 'manhwa', genre: 'Action · Mystery', rating: '9.2', match: '97%', desc: 'Bam enters the mysterious Tower to find his childhood friend Rachel, facing deadly trials on every floor.', poster: 'https://uploads.mangadex.org/covers/c600f681-300e-436f-b258-154df656a88b/a9c1c4e7-4958-45d2-a734-b25a3962d854.jpg.512.jpg' },
   { title: 'Attack on Titan Final Season', category: 'anime', genre: 'Action · Dark Fantasy', rating: '9.1', match: '98%', desc: 'Eren Yeager vows to cleanse the world of Titans after his hometown is destroyed.', poster: 'https://cdn.myanimelist.net/images/anime/1000/110531.jpg' },
   { title: 'Vincenzo', category: 'series', genre: 'K-Drama · Crime Comedy', rating: '8.5', match: '93%', desc: 'An Italian mafia lawyer returns to South Korea and uses villainous tactics to defeat unpunishable cartels.', poster: 'https://image.tmdb.org/t/p/w500/vD2w3o0D2z6n1.jpg' },
-  { title: 'Wind Breaker', category: 'manhwa', genre: 'Sports · Action', rating: '9.4', match: '96%', desc: 'Jay is a top student whose secret passion is street bicycle racing with his crew.', poster: 'https://cdn.myanimelist.net/images/manga/3/178729.jpg' },
+  { title: 'Wind Breaker', category: 'manhwa', genre: 'Sports · Action', rating: '9.4', match: '96%', desc: 'Jay is a top student whose secret passion is street bicycle racing with his crew.', poster: 'https://uploads.mangadex.org/covers/3522f18f-ebbc-4995-bb04-f65582f3ef0d/8e25dd05-e325-4c07-9b2f-12ee499d3e81.jpg.512.jpg' },
   { title: 'Bleach: Thousand-Year Blood War', category: 'anime', genre: 'Action · Supernatural', rating: '9.0', match: '97%', desc: 'Ichigo Kurosaki and the Soul Reapers face their ultimate nemesis: the Quincy Empire.', poster: 'https://cdn.myanimelist.net/images/anime/1764/126627.jpg' },
   { title: 'Steins;Gate', category: 'anime', genre: 'Sci-Fi · Time Travel', rating: '9.1', match: '95%', desc: 'A self-proclaimed mad scientist accidentally invents a microwave that can send text messages to the past.', poster: 'https://cdn.myanimelist.net/images/anime/1935/127974.jpg' },
-  { title: 'The Beginning After the End', category: 'manhwa', genre: 'Fantasy · Reincarnation', rating: '9.6', match: '98%', desc: 'A powerful king is reincarnated in a world filled with magic and monsters.', poster: 'https://cdn.myanimelist.net/images/manga/2/227488.jpg' },
+  { title: 'The Beginning After the End', category: 'manhwa', genre: 'Fantasy · Reincarnation', rating: '9.6', match: '98%', desc: 'A powerful king is reincarnated in a world filled with magic and monsters.', poster: 'https://uploads.mangadex.org/covers/f4a0c878-5e83-4a11-897b-edab9c1b72e5/6ea9f1e1-e18e-49b0-a39c-f9e422c54ee7.jpg.512.jpg' },
   { title: 'Squid Game', category: 'series', genre: 'K-Drama · Thriller', rating: '8.4', match: '92%', desc: 'Hundreds of cash-strapped players accept a strange invitation to compete in children\'s games for a massive prize.', poster: 'https://image.tmdb.org/t/p/w500/d5NXSklXo0qyIYkgV94.jpg' },
   { title: 'Demon Slayer: Hashira Training', category: 'anime', genre: 'Action · Supernatural', rating: '8.9', match: '96%', desc: 'Tanjiro undergoes intense training with the Hashira to prepare for the final battle against Muzan.', poster: 'https://cdn.myanimelist.net/images/anime/1242/141381.jpg' },
-  { title: 'Eleceed', category: 'manhwa', genre: 'Action · Comedy', rating: '9.7', match: '99%', desc: 'A cat-bodied secret agent trains a high schooler with secret lightning powers.', poster: 'https://cdn.myanimelist.net/images/manga/3/229047.jpg' }
+  { title: 'Eleceed', category: 'manhwa', genre: 'Action · Comedy', rating: '9.7', match: '99%', desc: 'A cat-bodied secret agent trains a high schooler with secret lightning powers.', poster: 'https://uploads.mangadex.org/covers/3f8221c9-7e05-41e9-9189-980b62854964/6b2ebed5-c0ea-46b0-99e7-d95b5832e8bb.jpg.512.jpg' }
 ];
 
 let oracleFilterCategory = 'all';
