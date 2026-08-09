@@ -113,19 +113,31 @@ function getPoster(item) {
   if (!item) url = FALLBACK_POSTER;
   else if (item.poster) url = item.poster;
   else if (item.image) url = item.image;
-  else if (item.title && POSTER_MAP[item.title]) url = POSTER_MAP[item.title];
-  else if (item.title) {
-    const titleLower = item.title.toLowerCase();
-    const match = Object.keys(POSTER_MAP).find(k => titleLower.includes(k.toLowerCase()) || k.toLowerCase().includes(titleLower));
-    if (match) url = POSTER_MAP[match];
+  
+  if (!url && item && item.title) {
+    if (POSTER_MAP[item.title]) url = POSTER_MAP[item.title];
+    else {
+      const titleLower = item.title.toLowerCase();
+      const match = Object.keys(POSTER_MAP).find(k => titleLower.includes(k.toLowerCase()) || k.toLowerCase().includes(titleLower));
+      if (match) url = POSTER_MAP[match];
+    }
+  }
+
+  // Intercept broken MyAnimeList manga CDN links (403 blocked)
+  if (url && (url.includes('cdn.myanimelist.net/images/manga/') || url.includes('placehold.co'))) {
+    if (item && item.title && POSTER_MAP[item.title]) {
+      url = POSTER_MAP[item.title];
+    } else {
+      url = 'https://uploads.mangadex.org/covers/32d76d19-8a05-4db0-9fc2-e0b0648464d0/d2449bdf-87db-452a-929a-fb08e6e58b1f.jpg.512.jpg';
+    }
   }
 
   if (url) return url;
 
   // Category fallback high-res posters
-  const cat = item.category || 'anime';
+  const cat = (item && item.category) || 'anime';
   if (cat === 'anime') return 'https://cdn.myanimelist.net/images/anime/1015/138025.jpg';
-  if (cat === 'manhwa') return 'https://uploads.mangadex.org/covers/32d76d19-8a05-4db0-9fc2-e0b0648464d0/d2449bdf-87db-452a-929a-fb08e6e58b1f.jpg.512.jpg';
+  if (cat === 'manhwa' || cat === 'manga') return 'https://uploads.mangadex.org/covers/32d76d19-8a05-4db0-9fc2-e0b0648464d0/d2449bdf-87db-452a-929a-fb08e6e58b1f.jpg.512.jpg';
   if (cat === 'series') return 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&auto=format&fit=crop';
   return 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&auto=format&fit=crop';
 }
@@ -1911,16 +1923,42 @@ function setupExploreFab() {
   const fab = $('#exploreFab');
   const matrix = $('#infinityMatrix');
 
-  fab.addEventListener('click', scrollToMatrix);
+  if (fab && matrix) {
+    fab.addEventListener('click', scrollToMatrix);
 
-  // Hide FAB when at the matrix
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      fab.classList.toggle('at-matrix', entry.isIntersecting);
-    });
-  }, { threshold: 0.1 });
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        fab.classList.toggle('at-matrix', entry.isIntersecting);
+      });
+    }, { threshold: 0.1 });
 
-  observer.observe(matrix);
+    observer.observe(matrix);
+  }
+
+  setupHelpFab();
+}
+
+function setupHelpFab() {
+  const helpFab = $('#helpFab');
+  const helpModal = $('#helpModal');
+  const closeHelpBtn = $('#closeHelpBtn');
+  const closeHelpBackdrop = $('#closeHelpBackdrop');
+
+  if (!helpFab || !helpModal) return;
+
+  const openHelp = () => {
+    helpModal.style.display = 'flex';
+    helpModal.classList.remove('hidden');
+  };
+
+  const closeHelp = () => {
+    helpModal.style.display = 'none';
+    helpModal.classList.add('hidden');
+  };
+
+  helpFab.onclick = openHelp;
+  if (closeHelpBtn) closeHelpBtn.onclick = closeHelp;
+  if (closeHelpBackdrop) closeHelpBackdrop.onclick = closeHelp;
 }
 
 // ============================================================
@@ -2844,6 +2882,13 @@ async function loadUserData(uid) {
 function saveLocalWatchlist() {
   try {
     localStorage.setItem('cinepulse_watchlist', JSON.stringify(state.titles));
+    if (state.insightsOpen) {
+      renderInsightsTab(state.insightsTab);
+    }
+    if (state.profileOpen) {
+      renderProfileStats();
+      renderProfileTab(state.profileTab);
+    }
   } catch (e) {
     console.error('Failed to save to localStorage', e);
   }

@@ -6,7 +6,7 @@
   <meta name="referrer" content="no-referrer">
   <meta name="description" content="Eclipse — Track your anime, manhwa, series, and movies with a beautiful cinematic interface">
   <title>Eclipse — Your Cinematic Universe</title>
-  <link rel="stylesheet" href="styles.css?v=9.1">
+  <link rel="stylesheet" href="styles.css?v=9.2">
 </head>
 <body>
 
@@ -573,15 +573,62 @@
   </div>
 
   <!-- ============================================================
-       FLOATING EXPLORE FAB
+       FLOATING ACTION BUTTONS (EXPLORE & HELP ?)
        ============================================================ -->
-  <button class="explore-fab" id="exploreFab">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-      <circle cx="12" cy="12" r="10"/>
-      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
-    </svg>
-    Explore
-  </button>
+  <div style="position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; z-index: 990; align-items: center;">
+    <button class="explore-fab" id="exploreFab" style="position: relative; bottom: auto; right: auto;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+      </svg>
+      Explore
+    </button>
+    <button class="help-fab" id="helpFab" style="background: linear-gradient(135deg, rgba(34, 229, 208, 0.95), rgba(155, 92, 255, 0.95)); color: #000; font-weight: 800; border: none; border-radius: 30px; padding: 12px 20px; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(34, 229, 208, 0.35); cursor: pointer; backdrop-filter: blur(10px); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+      <span style="font-size: 16px; font-weight: 900;">❓</span>
+      <span style="font-size: 13px; letter-spacing: 0.5px;">Help ?</span>
+    </button>
+  </div>
+
+  <!-- ============================================================
+       INTERACTIVE HELP & USER GUIDE MODAL
+       ============================================================ -->
+  <div id="helpModal" class="info-modal hidden" style="display:none; z-index: 2000;">
+    <div class="info-modal__backdrop" id="closeHelpBackdrop"></div>
+    <div class="info-modal__content" style="max-width: 650px; border: 1px solid var(--border-subtle); background: var(--bg-card); border-radius: 20px; padding: 24px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px;">
+        <div style="display:flex; align-items:center; gap: 12px;">
+          <div style="width:42px; height:42px; background:linear-gradient(135deg, var(--cyan), var(--violet)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px;">❓</div>
+          <div>
+            <h2 style="margin:0; font-size: 20px; font-weight: 800; color: var(--text-primary);">Eclipse Stream User Guide</h2>
+            <p style="margin:2px 0 0 0; font-size: 12px; color: var(--text-secondary);">Master every feature of your cinematic platform</p>
+          </div>
+        </div>
+        <button id="closeHelpBtn" style="background:rgba(255,255,255,0.08); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:16px; font-weight:700;">✕</button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap: 16px; max-height: 65vh; overflow-y: auto; padding-right: 6px;">
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px;">
+          <h4 style="margin:0 0 6px 0; color: var(--cyan); font-size: 14px; font-weight: 700;">🎬 Hero Card & Continuous Progress</h4>
+          <p style="margin:0; font-size: 12px; color: var(--text-secondary); line-height: 1.5;">The top Hero Section automatically showcases your most recently active title. Use <strong>+1 Ep / +1 Ch</strong> to quickly log progress, or <strong>Mark Complete</strong> to finish a title.</p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px;">
+          <h4 style="margin:0 0 6px 0; color: var(--violet); font-size: 14px; font-weight: 700;">🔮 Insights Hub & Oracle AI</h4>
+          <p style="margin:0; font-size: 12px; color: var(--text-secondary); line-height: 1.5;">Click <strong>Insights Hub</strong> in the header to view real-time total watch hours, chapters read, finish rates, trophy achievements, and the <strong>Oracle AI Engine</strong> which generates recommendations based on your affinity!</p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px;">
+          <h4 style="margin:0 0 6px 0; color: #10B981; font-size: 14px; font-weight: 700;">📜 Manhwa & Manga Reader Integration</h4>
+          <p style="margin:0; font-size: 12px; color: var(--text-secondary); line-height: 1.5;">Filter by <strong>Manhwa</strong> to view top webtoons powered by live MangaDex covers. Track chapter counts, read progress, and add titles directly to your library!</p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px;">
+          <h4 style="margin:0 0 6px 0; color: #F59E0B; font-size: 14px; font-weight: 700;">⚡ 6-Server Failover Player</h4>
+          <p style="margin:0; font-size: 12px; color: var(--text-secondary); line-height: 1.5;">Click <strong>Watch Now</strong> or any title card to open the 6-Server player. Switch servers instantly if any source experiences buffering.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ============================================================
        6-Server Failover Player Modal
@@ -752,7 +799,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=9.1"></script>
+  <script type="module" src="app.js?v=9.2"></script>
 
   <script>
     // Fail-safe: if app.js completely fails to load due to CDN blocks (Firebase),
