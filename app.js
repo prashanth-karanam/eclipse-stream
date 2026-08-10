@@ -271,7 +271,7 @@ function createContentCard(item, showOverlay = true) {
     <div class="content-card__info" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
       <div style="flex: 1; min-width: 0;">
         <div class="content-card__title">${item.title}</div>
-        <div class="content-card__sub">${item.category ? item.category.charAt(0).toUpperCase() + item.category.slice(1) : ''} ${item.genre ? '· ' + item.genre : ''}</div>
+        <div class="content-card__sub">${item.category ? (item.category || 'anime').charAt(0).toUpperCase() + item.category.slice(1) : ''} ${item.genre ? '· ' + item.genre : ''}</div>
       </div>
       ${item.category !== 'manhwa' ? `
         <button class="content-card__play-btn" title="Stream Now" style="background: var(--cyan, #FF4B4B); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: transform 0.2s ease; box-shadow: 0 2px 8px rgba(255, 75, 75, 0.4);">
@@ -558,7 +558,7 @@ function updateHeroZone() {
     metaText = `Manhwa · ${current.genre || 'Action'} · ${total === '?' ? '?' : total} chapters`;
   } else {
     const total = current.episodes || current.totalEpisodes || '?';
-    metaText = `${current.category.charAt(0).toUpperCase() + current.category.slice(1)} · ${current.genre || 'Action'} · ${total === '?' ? '?' : total} episodes`;
+    metaText = `${(current.category || 'anime').charAt(0).toUpperCase() + current.category.slice(1)} · ${current.genre || 'Action'} · ${total === '?' ? '?' : total} episodes`;
   }
   $('#heroMeta').textContent = metaText;
 
@@ -1349,7 +1349,7 @@ function renderOverviewTab() {
                 <img src="${getPoster(t)}" class="ih-progress-item__poster" onerror="this.style.display='none'">
                 <div class="ih-progress-item__info">
                   <div class="ih-progress-item__title">${t.title}</div>
-                  <div class="ih-progress-item__meta">${t.category.charAt(0).toUpperCase()+t.category.slice(1)} · ${unitWord} ${t.progress||0}${total>0?' / '+total:''}</div>
+                  <div class="ih-progress-item__meta">${(t.category || 'anime').charAt(0).toUpperCase()+t.category.slice(1)} · ${unitWord} ${t.progress||0}${total>0?' / '+total:''}</div>
                   <div class="ih-progress-item__track">
                     <div class="ih-progress-item__fill" style="width:${pct}%"></div>
                   </div>
@@ -1623,7 +1623,7 @@ function renderOracleTab() {
             <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${p.title}</h4>
             <span style="font-size: 11px; color: #10B981; font-weight: 800; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:10px;">★ ${p.rating} · ${matchScore} Match</span>
           </div>
-          <div style="font-size: 11px; color: var(--cyan); font-weight: 600; margin-bottom: 4px;">${p.category.toUpperCase()} · ${p.genre}</div>
+          <div style="font-size: 11px; color: var(--cyan); font-weight: 600; margin-bottom: 4px;">${(p.category || 'anime').toUpperCase()} · ${p.genre}</div>
           <p style="font-size: 11px; color: var(--text-secondary); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">${p.desc}</p>
         </div>
         <button class="btn-primary oracle-quick-add" data-title="${p.title}" data-category="${p.category}" data-genre="${p.genre}" data-poster="${p.poster}" style="padding: 8px 14px; font-size: 12px; font-weight: 700; flex-shrink: 0;">
@@ -1839,7 +1839,7 @@ async function renderCmdPaletteResults(query) {
           ${t.poster ? `<img src="${t.poster}" alt="poster" style="width: 24px; height: 36px; border-radius: 4px; object-fit: cover; margin-right: 12px;"/>` : `<div class="command-palette__item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/></svg></div>`}
           <div style="display: flex; flex-direction: column;">
             <span class="command-palette__item-text">${t.title}</span>
-            <span class="command-palette__item-hint" style="margin-left: 0;">${t.category.toUpperCase()} · ${t.releaseYear || '?'} · ⭐ ${t.rating || 'N/A'}</span>
+            <span class="command-palette__item-hint" style="margin-left: 0;">${(t.category || 'anime').toUpperCase()} · ${t.releaseYear || '?'} · ⭐ ${t.rating || 'N/A'}</span>
           </div>
         </div>
       `;
@@ -2061,7 +2061,7 @@ async function initLiveCatalog(page = 1, append = false) {
     seenIds.add(item.id);
     const enriched = {
       ...item,
-      reason: item.reason || ('🔥 Trending in ' + (item.category ? item.category.charAt(0).toUpperCase() + item.category.slice(1) : 'Catalog'))
+      reason: item.reason || ('🔥 Trending in ' + (item.category ? (item.category || 'anime').charAt(0).toUpperCase() + item.category.slice(1) : 'Catalog'))
     };
     liveCatalog.push(enriched);
     
@@ -3864,7 +3864,7 @@ window.openPlayer = async function(media) {
   
   // Update UI
   $('#modalMediaTitle').textContent = media.title;
-  $('#modalMediaMeta').textContent = `${media.releaseYear || ''} • ${media.category.toUpperCase()}`;
+  $('#modalMediaMeta').textContent = `${media.releaseYear || ''} • ${(media.category || 'anime').toUpperCase()}`;
   
   // Set server dropdown to best match
   const serverOptionEl = Array.from($$('.select-option')).find(o => o.getAttribute('data-value') === bestServer);
