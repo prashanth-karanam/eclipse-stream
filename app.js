@@ -3532,12 +3532,24 @@ function renderProfileTab(tab) {
             try {
               e.target.textContent = 'Adding...';
               e.target.disabled = true;
+              
               const myDocRef = doc(db, 'users', state.user.uid);
-              await updateDoc(myDocRef, {
-                friends: arrayUnion(friendUid)
-              });
+              const friendDocRef = doc(db, 'users', friendUid);
+              
+              // Bilateral friend update
+              await Promise.all([
+                updateDoc(myDocRef, { friends: arrayUnion(friendUid) }),
+                updateDoc(friendDocRef, { friends: arrayUnion(state.user.uid) })
+              ]);
+              
+              if (!state.userProfile) state.userProfile = {};
+              state.userProfile.friends = state.userProfile.friends || [];
+              if (!state.userProfile.friends.includes(friendUid)) {
+                state.userProfile.friends.push(friendUid);
+              }
+
               showUndoToast(`Added ${friendName} to your friends!`);
-              renderFriendsView();
+              renderProfileTab('friends');
             } catch(err) {
               console.error('Error adding friend:', err);
               e.target.textContent = 'Add Friend';
@@ -3619,9 +3631,12 @@ function renderProfileTab(tab) {
 
             try {
               const myDocRef = doc(db, 'users', state.user.uid);
-              await updateDoc(myDocRef, {
-                friends: arrayUnion(friendUid)
-              });
+              const friendDocRef = doc(db, 'users', friendUid);
+              
+              await Promise.all([
+                updateDoc(myDocRef, { friends: arrayUnion(friendUid) }),
+                updateDoc(friendDocRef, { friends: arrayUnion(state.user.uid) })
+              ]);
               
               if (!state.userProfile) state.userProfile = {};
               state.userProfile.friends = state.userProfile.friends || [];
@@ -3631,7 +3646,7 @@ function renderProfileTab(tab) {
 
               showUndoToast(`Added ${friendUsername} as a friend!`);
               btn.textContent = 'Added ✓';
-              renderFriendsView();
+              renderProfileTab('friends');
             } catch (err) {
               console.error('Failed to add friend:', err);
               btn.textContent = 'Add Friend';
@@ -4252,21 +4267,22 @@ window.openFriendProfile = function(friendUid, friendName, friendEmail) {
       titles.sort((a,b) => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0));
 
       const feedHtml = titles.map(t => {
-        const isReading = t.category === 'manhwa';
+        const category = t.category || 'anime';
+        const isReading = category === 'manhwa';
         const total = t.episodes || t.chapters || t.totalEpisodes || 0;
         const pct = total > 0 ? Math.min(100, Math.round(((t.progress || 0) / total) * 100)) : 0;
         const statusClr = t.status === 'completed' ? '#10B981' : 'var(--cyan)';
-        const unitWord = isReading ? 'Ch' : (t.category === 'movies' ? 'Movie' : 'Ep');
+        const unitWord = isReading ? 'Ch' : (category === 'movies' ? 'Movie' : 'Ep');
 
         return `
           <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:10px;">
             <img src="${getPoster(t)}" style="width:40px; height:56px; object-fit:cover; border-radius:6px; flex-shrink:0;" onerror="this.src='https://placehold.co/40x56/1a1a2e/ffffff?text=Eclipse'">
             <div style="flex:1; min-width:0;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                <div style="font-weight:700; font-size:13px; color:var(--text-primary); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${t.title}</div>
+                <div style="font-weight:700; font-size:13px; color:var(--text-primary); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${t.title || 'Unknown Title'}</div>
                 <span style="font-size:10px; font-weight:800; color:${statusClr}; background:rgba(255,255,255,0.06); padding:2px 8px; border-radius:8px;">${(t.status || 'watching').toUpperCase()}</span>
               </div>
-              <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">${t.category.toUpperCase()} · ${unitWord} ${t.progress || 0}${total > 0 ? ' / ' + total : ''}</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">${category.toUpperCase()} · ${unitWord} ${t.progress || 0}${total > 0 ? ' / ' + total : ''}</div>
               <div style="background:rgba(255,255,255,0.08); height:4px; border-radius:2px; overflow:hidden;">
                 <div style="background:${statusClr}; height:100%; width:${pct}%;"></div>
               </div>
