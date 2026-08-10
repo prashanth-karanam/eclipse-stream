@@ -2686,6 +2686,10 @@ function setupAuth() {
     if (user) {
       state.user = user;
       authOverlay.classList.add('hidden'); // Hide overlay
+      
+      const guestModal = document.getElementById('guestUsernameModal');
+      if (guestModal) guestModal.remove();
+      
       await loadUserData(user.uid);
     } else {
       state.user = null;
