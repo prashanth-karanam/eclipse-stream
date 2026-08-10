@@ -6,7 +6,7 @@
   <meta name="referrer" content="no-referrer">
   <meta name="description" content="Eclipse — Track your anime, manhwa, series, and movies with a beautiful cinematic interface">
   <title>Eclipse — Your Cinematic Universe</title>
-  <link rel="stylesheet" href="styles.css?v=9.4">
+  <link rel="stylesheet" href="styles.css?v=9.5">
 </head>
 <body>
 
@@ -631,6 +631,61 @@
   </div>
 
   <!-- ============================================================
+       LIVE FRIEND PROFILE REAL-TIME MODAL
+       ============================================================ -->
+  <div id="friendProfileModal" class="info-modal hidden" style="display:none; z-index: 2050;">
+    <div class="info-modal__backdrop" id="closeFriendProfileBackdrop"></div>
+    <div class="info-modal__content" style="max-width: 680px; border: 1px solid var(--border-subtle); background: var(--bg-card); border-radius: 20px; padding: 24px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px;">
+        <div style="display:flex; align-items:center; gap: 14px;">
+          <img id="fpAvatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Friend" style="width: 52px; height: 52px; border-radius: 50%; background: var(--bg-surface); border: 2px solid var(--cyan);">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <h2 id="fpName" style="margin:0; font-size: 20px; font-weight: 800; color: var(--text-primary);">Friend Name</h2>
+              <span id="fpLiveBadge" class="ih-badge" style="background: rgba(16,185,129,0.15); color: #10B981; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">
+                <span style="width:7px; height:7px; background:#10B981; border-radius:50%; display:inline-block; box-shadow:0 0 8px #10B981;"></span>
+                Live Real-Time Sync
+              </span>
+            </div>
+            <p id="fpSub" style="margin:2px 0 0 0; font-size: 12px; color: var(--text-secondary);">Connecting to live Firestore feed...</p>
+          </div>
+        </div>
+        <button id="closeFriendProfileBtn" style="background:rgba(255,255,255,0.08); border:none; color:#fff; width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:16px; font-weight:700;">✕</button>
+      </div>
+
+      <!-- Friend Live KPIs -->
+      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 10px; text-align: center;">
+          <div id="fpWatchH" style="font-size: 18px; font-weight: 800; color: var(--cyan);">0h</div>
+          <div style="font-size: 11px; color: var(--text-muted);">Watch Time</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 10px; text-align: center;">
+          <div id="fpCompleted" style="font-size: 18px; font-weight: 800; color: #10B981;">0</div>
+          <div style="font-size: 11px; color: var(--text-muted);">Completed</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 10px; text-align: center;">
+          <div id="fpInProg" style="font-size: 18px; font-weight: 800; color: #F59E0B;">0</div>
+          <div style="font-size: 11px; color: var(--text-muted);">In Progress</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 10px; text-align: center;">
+          <div id="fpChapters" style="font-size: 18px; font-weight: 800; color: #9B5CFF;">0</div>
+          <div style="font-size: 11px; color: var(--text-muted);">Chapters Read</div>
+        </div>
+      </div>
+
+      <!-- Friend Live Activity & Watchlist Feed -->
+      <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+        <span>Live Library Feed</span>
+        <span style="font-size: 11px; color: var(--cyan); font-weight: 600;">Updates automatically as friend watches</span>
+      </div>
+
+      <div id="fpWatchlistFeed" style="display: flex; flex-direction: column; gap: 8px; max-height: 45vh; overflow-y: auto; padding-right: 4px;">
+        <div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 13px;">Establishing live stream connection...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
        6-Server Failover Player Modal
        ============================================================ -->
   <div id="playerModal" class="player-overlay-modal hidden" style="display:none;">
@@ -799,7 +854,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=9.4"></script>
+  <script type="module" src="app.js?v=9.5"></script>
 
   <script>
     // Fail-safe: if app.js completely fails to load due to CDN blocks (Firebase),

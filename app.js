@@ -11,7 +11,7 @@ import {
 import { 
   auth, db, 
   signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged,
-  doc, setDoc, getDoc, collection, query, where, getDocs, updateDoc, arrayUnion, deleteDoc
+  doc, setDoc, getDoc, collection, query, where, getDocs, updateDoc, arrayUnion, deleteDoc, onSnapshot
 } from './firebase-config.js';
 
 // ============================================================
@@ -3437,7 +3437,7 @@ function renderProfileTab(tab) {
               const fData = fDoc.data();
               const fName = fData.username || fData.email;
               html += `
-                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; margin-bottom: 8px;">
+                <div onclick="window.openFriendProfile('${friendUid}', '${fName.replace(/'/g, "\\'")}', '${(fData.email || '').replace(/'/g, "\\'")}')" style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.2s;" onmouseover="this.style.borderColor='var(--cyan)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
                   <div style="display: flex; align-items: center; gap: 12px;">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(fName)}" style="width: 36px; height: 36px; border-radius: 50%; background: var(--bg-surface);">
                     <div>
@@ -3445,7 +3445,10 @@ function renderProfileTab(tab) {
                       <div style="font-size: 12px; color: var(--text-muted);">${fData.email}</div>
                     </div>
                   </div>
-                  <span class="status-badge status-badge--completed" style="font-size: 11px;">Friend</span>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="status-badge status-badge--completed" style="font-size: 11px;">Friend</span>
+                    <button style="background: rgba(34,229,208,0.15); color: var(--cyan); border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer;">👁️ Live Profile</button>
+                  </div>
                 </div>
               `;
             }
@@ -3499,11 +3502,11 @@ function renderProfileTab(tab) {
           const actionHtml = isSelf 
             ? '<span class="status-badge status-badge--completed" style="font-size:10px;">You</span>' 
             : (isAlreadyFriend 
-              ? '<span class="status-badge status-badge--watching" style="font-size:10px; background:rgba(34,229,208,0.15); color:var(--cyan);">✓ Friend</span>' 
-              : `<button class="progress-item__action-btn progress-item__action-btn--primary comm-add-friend-btn" data-uid="${uid}" data-username="${uName}" style="font-size:11px;padding:4px 10px;">Add Friend</button>`);
+              ? `<div style="display:flex; gap:6px;"><span class="status-badge status-badge--watching" style="font-size:10px; background:rgba(34,229,208,0.15); color:var(--cyan);">✓ Friend</span><button onclick="event.stopPropagation(); window.openFriendProfile('${uid}', '${uName.replace(/'/g, "\\'")}', '${(u.email || '').replace(/'/g, "\\'")}')" style="background:rgba(34,229,208,0.15); color:var(--cyan); border:none; border-radius:6px; padding:4px 8px; font-size:10px; font-weight:700; cursor:pointer;">👁️ Live</button></div>` 
+              : `<div style="display:flex; gap:6px;"><button class="progress-item__action-btn progress-item__action-btn--primary comm-add-friend-btn" data-uid="${uid}" data-username="${uName}" style="font-size:11px;padding:4px 10px;">Add Friend</button><button onclick="event.stopPropagation(); window.openFriendProfile('${uid}', '${uName.replace(/'/g, "\\'")}', '${(u.email || '').replace(/'/g, "\\'")}')" style="background:rgba(255,255,255,0.08); color:#fff; border:none; border-radius:6px; padding:4px 8px; font-size:10px; font-weight:700; cursor:pointer;">👁️ Profile</button></div>`);
 
           cHtml += `
-            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; margin-bottom: 8px;">
+            <div onclick="window.openFriendProfile('${uid}', '${uName.replace(/'/g, "\\'")}', '${(u.email || '').replace(/'/g, "\\'")}')" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; margin-bottom: 8px; cursor: pointer;">
               <div style="display: flex; align-items: center; gap: 10px;">
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(uName)}" style="width: 32px; height: 32px; border-radius: 50%; background: var(--bg-surface);">
                 <div>
@@ -3511,7 +3514,7 @@ function renderProfileTab(tab) {
                   <div style="font-size: 11px; color: var(--text-muted);">${u.email || 'User'}</div>
                 </div>
               </div>
-              ${actionHtml}
+              <div onclick="event.stopPropagation()">${actionHtml}</div>
             </div>
           `;
         });
@@ -4178,5 +4181,108 @@ function initCommunityAndProfileViewer() {
     }
   }
 }
+
+// ============================================================
+// LIVE FRIEND PROFILE REAL-TIME FIRESTORE LISTENER
+// ============================================================
+window.openFriendProfile = function(friendUid, friendName, friendEmail) {
+  const modal = $('#friendProfileModal');
+  const closeBtn = $('#closeFriendProfileBtn');
+  const closeBackdrop = $('#closeFriendProfileBackdrop');
+  if (!modal) return;
+
+  const fName = friendName || 'Friend';
+  $('#fpName').textContent = fName;
+  $('#fpSub').textContent = `Syncing live Firestore activity for ${friendEmail || 'user'}...`;
+  $('#fpAvatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(fName)}`;
+
+  modal.style.display = 'flex';
+  modal.classList.remove('hidden');
+
+  const closeModal = () => {
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+    if (state.activeFriendUnsub) {
+      state.activeFriendUnsub();
+      state.activeFriendUnsub = null;
+    }
+  };
+
+  if (closeBtn) closeBtn.onclick = closeModal;
+  if (closeBackdrop) closeBackdrop.onclick = closeModal;
+
+  // Unsubscribe previous active listener if any
+  if (state.activeFriendUnsub) {
+    state.activeFriendUnsub();
+    state.activeFriendUnsub = null;
+  }
+
+  const feedEl = $('#fpWatchlistFeed');
+  feedEl.innerHTML = '<div style="text-align:center; color:var(--cyan); font-size:13px; padding:20px 0;">⚡ Subscribing to live Firestore stream...</div>';
+
+  try {
+    const friendWatchlistRef = collection(db, 'users', friendUid, 'watchlist');
+    state.activeFriendUnsub = onSnapshot(friendWatchlistRef, (snapshot) => {
+      const titles = [];
+      snapshot.forEach(docSnap => {
+        titles.push(docSnap.data());
+      });
+
+      // Calculate stats live
+      const completedCount = titles.filter(t => t.status === 'completed').length;
+      const inProgressCount = titles.filter(t => t.status === 'in-progress' || t.status === 'watching').length;
+      const chaptersRead = titles.filter(t => t.category === 'manhwa').reduce((s, t) => s + (t.progress || 0), 0);
+      const totalWatchH = titles.filter(t => t.category !== 'manhwa').reduce((s, t) => {
+        const h = t.category === 'movies' ? ((t.runtime || 120) / 60) : 0.4;
+        return s + (t.progress || 0) * h;
+      }, 0);
+
+      $('#fpWatchH').textContent = `${totalWatchH.toFixed(0)}h`;
+      $('#fpCompleted').textContent = completedCount;
+      $('#fpInProg').textContent = inProgressCount;
+      $('#fpChapters').textContent = chaptersRead.toLocaleString();
+      $('#fpSub').textContent = `🔴 Live Real-Time Feed · ${titles.length} total titles logged`;
+
+      if (titles.length === 0) {
+        feedEl.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:13px; padding:20px 0;">No live titles added to friend library yet.</div>';
+        return;
+      }
+
+      // Sort by last updated / in progress
+      titles.sort((a,b) => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0));
+
+      const feedHtml = titles.map(t => {
+        const isReading = t.category === 'manhwa';
+        const total = t.episodes || t.chapters || t.totalEpisodes || 0;
+        const pct = total > 0 ? Math.min(100, Math.round(((t.progress || 0) / total) * 100)) : 0;
+        const statusClr = t.status === 'completed' ? '#10B981' : 'var(--cyan)';
+        const unitWord = isReading ? 'Ch' : (t.category === 'movies' ? 'Movie' : 'Ep');
+
+        return `
+          <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:10px;">
+            <img src="${getPoster(t)}" style="width:40px; height:56px; object-fit:cover; border-radius:6px; flex-shrink:0;" onerror="this.src='https://placehold.co/40x56/1a1a2e/ffffff?text=Eclipse'">
+            <div style="flex:1; min-width:0;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                <div style="font-weight:700; font-size:13px; color:var(--text-primary); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${t.title}</div>
+                <span style="font-size:10px; font-weight:800; color:${statusClr}; background:rgba(255,255,255,0.06); padding:2px 8px; border-radius:8px;">${(t.status || 'watching').toUpperCase()}</span>
+              </div>
+              <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">${t.category.toUpperCase()} · ${unitWord} ${t.progress || 0}${total > 0 ? ' / ' + total : ''}</div>
+              <div style="background:rgba(255,255,255,0.08); height:4px; border-radius:2px; overflow:hidden;">
+                <div style="background:${statusClr}; height:100%; width:${pct}%;"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      feedEl.innerHTML = feedHtml;
+    }, (err) => {
+      console.error('Failed to subscribe to friend snapshot:', err);
+      feedEl.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:13px; padding:20px 0;">Unable to subscribe to friend real-time feed.</div>';
+    });
+  } catch (e) {
+    console.error('Error in openFriendProfile:', e);
+  }
+};
 
 
