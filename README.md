@@ -1,43 +1,71 @@
-# 🎬 Eclipse Stream & CinePulse
+﻿# Eclipse Stream (CinePulse)
 
-Eclipse Stream is an ultra-responsive, self-hosted personal cinema platform uniting fluid high-definition video delivery, intelligent movie metadata curation, ambient player cinematics, and real-time watch tracking via the built-in CinePulse engine.
+A self-hosted personal media streaming interface and watchlist manager engineered with vanilla web APIs, responsive media layouts, and a zero-dependency Node.js HTTP server.
 
----
-
-## 🔥 Flagship Cinema Features
-
-1. **Ambient Glow Cinema Player**: The video player extracts dominant color palettes from active frames in real-time to cast a dynamic, synchronized ambient backlight around the viewing frame.
-2. **CinePulse Cross-Device Resume**: Built-in tracking engine that seamlessly saves exact video timestamps down to the second, allowing for perfect cross-device playback resume across mobile and desktop.
-3. **Automated Metadata Curation**: Instantly queries the TMDb API to aggregate and display high-res movie posters, complete cast lists, official trailers, and live IMDb ratings.
-4. **High-Fluidity HLS Stream Delivery**: Serves adaptive bitrate video streams with zero buffering, low memory overhead, and native HTML5 video acceleration.
-5. **Responsive Glassmorphism UI**: Beautiful, modern cinematic layout featuring frosted glass styling, smooth CSS micro-animations, and optimized for high-refresh-rate desktop displays.
-6. **Smart Watchlist & Collection**: Manages custom movie collections, TV episode progress, reading history (Manga/Manhwa via MangaDex API), and granular viewing analytics.
+[![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20Self--Hosted-blue?style=flat)](https://github.com/prashanth-karanam/eclipse-stream)
+[![Node.js](https://img.shields.io/badge/Runtime-Node.js%20HTTP-339933?style=flat&logo=nodedotjs)](https://nodejs.org)
+[![Vanilla JS](https://img.shields.io/badge/Frontend-ES6%20%2F%20HTML5%20Video-F7DF1E?style=flat&logo=javascript)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat)](LICENSE)
 
 ---
 
-## 🌐 Live Demo & Access
+## Overview
 
-Experience the live Cinematic UI and Tracker here:
-**[https://eclipse-stream.web.app](https://eclipse-stream.web.app)**
+**Eclipse Stream** is a lightweight, self-hosted web media player and movie metadata explorer. Built without heavyweight frontend frameworks or complex build toolchains, it delivers an ultra-fast streaming interface with dynamic category browsing, media playback overlays, and custom watchlist tracking.
 
----
+## Key Features
 
-## 💻 Local Setup & Deployment
+- **Lightweight Architecture**: Zero-framework vanilla JavaScript client with optimized CSS3 glassmorphism layout.
+- **Embedded Media Server**: Built-in zero-dependency Node.js server (`server.js`) handling MIME types, static file serving, and asset routing.
+- **Responsive Media Player**: Fluid HTML5 video player integration with custom playback controls and responsive layout across mobile and desktop.
+- **Zero Heavy Toolchains**: Runs directly out of the box without bundlers, Webpack, or complicated build configurations.
 
-1. **Clone the repository**:
+## Architecture
+
+```
++-------------------------------------------------------------+
+|                      Browser Client                         |
+|                                                             |
+|   +-----------------------+     +-----------------------+   |
+|   |  CinePulse Media UI   | <-> |  HTML5 Video Canvas   |   |
+|   |  (Catalog & Watchlist)|     |  (Overlay Controls)   |   |
+|   +-----------------------+     +-----------------------+   |
++-------------------------------------------------------------+
+                              | (HTTP / Static Assets)
+                              v
++-------------------------------------------------------------+
+|                Local Node.js HTTP Daemon                    |
+|                        (server.js)                          |
++-------------------------------------------------------------+
+```
+
+## Tech Stack
+
+- **Frontend**: Vanilla JavaScript (ES6+), HTML5 Video API, CSS3
+- **Backend / Daemon**: Node.js (`http`, `fs`, `path`)
+- **Port**: Default `3000` (Configurable via `PORT`)
+
+## Getting Started
+
+### Prerequisites
+- Node.js installed (v16+)
+
+### Local Setup
+
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/prashanth-karanam/eclipse-stream.git
    cd eclipse-stream
    ```
-2. **Serve Locally**: 
-   Since Eclipse Stream is a client-side architecture, you can serve it via any static web server (e.g. Node's `http-server` or Python's `http.server`).
+
+2. **Start the server:**
    ```bash
-   npx http-server
+   node server.js
    ```
-3. **Enjoy**: Open `http://localhost:8080` in your web browser for the full cinematic experience!
 
----
+3. **Open in your browser:**  
+   Visit `http://localhost:3000` to access the interface.
 
-## 📜 Open Source
+## License
 
-Eclipse Stream is a hand-crafted media architecture built for optimal video streaming fluidity and beautiful metadata curation. Free to use and expand.
+This project is open-source and licensed under the [MIT License](LICENSE).
